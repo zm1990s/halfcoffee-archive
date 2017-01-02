@@ -29,8 +29,8 @@ Virtual SAN 是一个集成在Hypervisor中，与VMware vsphere高度集成的�
 
 VSAN 当前有两种配置选项，混合配置(hybird)及全闪配置(all-flash)；混合配置下一个磁盘组使用一个SSD做读写缓存(容量7/3划分)，机械硬盘存储数据。全闪模式下使用寿命高的SSD作为写缓存盘(100%空间用于写缓存，最大只能使用600G空间)，使用读性能较好、寿命不高但价格低廉的SSD作为数据存储盘。
 
-### 解读：
-> 每个VSAN存储对应一个集群，一一对应，一个集群中所有主机都会开启VSAN功能（需要手动配置VSAN网络），一个集群只能有一个VSAN，所有硬盘都在这一个VSAN中，VSAN中的存储不能直接供其他集群直接使用，需要通过创建NAS存储的方式对外提供存储服务。
+>解读：
+>  每个VSAN存储对应一个集群，一一对应，一个集群中所有主机都会开启VSAN功能（需要手动配置VSAN网络），一个集群只能有一个VSAN，所有硬盘都在这一个VSAN中，VSAN中的存储不能直接供其他集群直接使用，需要通过创建NAS存储的方式对外提供存储服务。
 VSAN 基于 storage policies，通过策略可以定义每个虚机副本数(以此决定主机/硬盘最大故障数)，还有资源预留、条带等很多参数设置。
 
 # 开始之前：
@@ -96,15 +96,15 @@ VSAN 基于 storage policies，通过策略可以定义每个虚机副本数(以
 
 全闪存VSAN下，每个磁盘组的缓存盘最大只能使用600G(All-flash自身限制，因此容量过大就是浪费)，全被作为写缓存。写缓存可以减少容量层SSD的写操作，延长这些磁盘的寿命。在全闪模式下，一定要注意flash(缓存)层磁盘的寿命！
 
- 2.2.1 读缓存**
+### 2.2.1 读缓存
 
-读缓存**仅在混合模式有效**。VSAN将vm最近读取的数据块保存在闪存中，减少读取延迟，提高读取效率。
+读缓存仅在混合模式有效。VSAN将vm最近读取的数据块保存在闪存中，减少读取延迟，提高读取效率。
 
 当有VM有多个副本时，VSAN均衡地从每个副本读取数据块放在SSD中。
 
 如果需要读取的数据块不在一个SSD中，VSAN directory service会在其他主机的SSD中搜索此块，如果最终未找到，则出现一个read cache miss，数据直接从磁盘去读取。
 
-2.2.2 写缓存**
+### 2.2.2 写缓存
 
 写缓存在混合模式和全闪存模式中都存在，可以增加性能，提高全闪存时容量层SSD的寿命。
 
@@ -114,13 +114,13 @@ VSAN 基于 storage policies，通过策略可以定义每个虚机副本数(以
 
 而全闪配置下，所有写操作先经过SSD，但是**并不会定期往容量层回写数据，只有当SSD上数据不再是热点数据(不再变化)时才会往容量层写**，由此提高容量层SSD寿命。
 
-2.2.3 PCIE闪存盘 和 SSD的选择**
+### 2.2.3 PCIE闪存盘 和 SSD的选择**
 
-关键词：性能需求，预算，容量
+> 关键词：性能需求，预算，容量
 
 在计划使用PCIE闪存盘(nvme)时需要从价格、性能及容量三个方面考虑：
 
-SSD 使用SATA接口，因此目前受限于SATA的6Gb/s接口(虽然SAS口可以达到12Gb/s，但是兼容SATA也就只有6Gb/s)。PCIE的闪存盘使用PCIE接口，接口类型为3.x时最大可达到32GB/s的带宽(PCIE闪存盘可以使用16个通道传输数据，每个通道单向有效带宽为1GB/s，双向2GB/s，更多详情请查看[PCI-E百科](http://baike.baidu.com/link?url=pMz8CjH9FbIkbyUxcIhMlkOi24NPJckjEM58uL9YYL2TwSMEl1fuTcqwOaTm76_ILRO3B2xO2r9CgY7Xih626_)[)](https://en.wikipedia.org/wiki/PCI_Express)。
+SSD 使用SATA接口，因此目前受限于SATA的6Gb/s接口(虽然SAS口可以达到12Gb/s，但是兼容SATA也就只有6Gb/s)。PCIE的闪存盘使用PCIE接口，接口类型为3.x时最大可达到32GB/s的带宽(PCIE闪存盘可以使用16个通道传输数据，每个通道单向有效带宽为1GB/s，双向2GB/s，更多详情请查看[PCI-E 百科](http://baike.baidu.com/link?url=pMz8CjH9FbIkbyUxcIhMlkOi24NPJckjEM58uL9YYL2TwSMEl1fuTcqwOaTm76_ILRO3B2xO2r9CgY7Xih626_)，[Wiki](https://en.wikipedia.org/wiki/PCI_Express)。
 
 使用PCIE闪存盘也可以减少存储控制器的负载，因此有助于提高VSAN性能。
 
@@ -130,7 +130,7 @@ PCIE 选择时也要注意服务器PCIE可用插槽位，当服务器磁盘组�
 
 但如果使用SSD，SSD会占用HDD的槽位，如果服务器数量有限，但要求大容量，则可能选择nvme会好些。
 
-2.2.4 闪存寿命**
+### 2.2.4 闪存寿命
 
 在VSAN6.0之后，使用TBW(TB字节写入)来计算寿命，而在此之前使用DWPD(每日整盘擦写的次数)来算寿命。
 
@@ -146,7 +146,7 @@ PCIE 选择时也要注意服务器PCIE可用插槽位，当服务器磁盘组�
 
 
 
-2.2.5 快照开销**
+### 2.2.5 快照开销
 
 根据[这篇文章](https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1025279)，vSphere建议快照只保留24-72小时，最多32个快照，为了保证性能建议只留2-3个快照。
 
@@ -156,15 +156,13 @@ VSAN 6.0混合模式下，创建多个活动的快照可能很快将缓存耗尽
 
 All-Flash 下缓存层:容量层为什么是1:10，文章描述了从寿命角度计算，为什么缓存层和容量层也推荐用1：10。**
 
-2.3 磁盘(容量层)设计**
+## 2.3 磁盘(容量层)设计
 
-关键词：类型、容量、数量、速度、价格
+> 关键词：类型、容量、数量、速度、价格
 
 VSAN兼容列表里，有三种磁盘可以做容量层：SAS、NL-SAS、SATA盘。
 
-按照最大容量对比：SATA 可达4T， NL-SAS 可达2T， SAS最大1.2T
-
-。
+按照最大容量对比：SATA 可达4T， NL-SAS 可达2T， SAS最大1.2T。
 
 价格对比： SAS > NL-SAS >SATA 
 
@@ -178,9 +176,9 @@ VSAN可以达到90%的读命中率，意味着有10%的读操作需要从HDD中�
 
 设计考虑：如果考虑到性能，建议优先采用10K以上的SAS盘。总容量不变的情况下，多个小容量HDD会比几个大容量组成的VSAN环境有更好的性能。一个环境**最好使用相同型号的HDD！**
 
-2.3.1 磁盘总容量设计**
+### 2.3.1 磁盘总容量设计
 
-关键词：30% 容量冗余
+> 关键词：30% 容量冗余
 
 VSAN 总容量一般由需要的空间和FTT决定。当客户需要100T实际空间时，当FTT=1，那么裸磁盘总容量则为200T。
 
@@ -195,21 +193,21 @@ VSAN 规定，当磁盘使用率达到80%的时候，会自动进行重平衡(Re
   
 
 
-2.3.2 文件系统格式开销**
+### 2.3.2 文件系统格式开销
 
 VSAN有自己的文件系统格式，到目前6.2使用v3版本，v3版本的开销为1%+duplication metadata，而Duplication metadata随着数据类型而变动很大。 VMware依然建议预留30%空间。
 
 
 
-![VSAN 6.2 设计指南(原创) - zm - Art - Life](http://img0.ph.126.net/J1iwZIc_oa5kvu823zJ8nQ==/6631712079514947288.png "VSAN 6.2 设计指南(原创) - zm - Art - Life")
+![VSAN 文件系统开销对比](http://img0.ph.126.net/J1iwZIc_oa5kvu823zJ8nQ==/6631712079514947288.png)
 
  
 
-2.4 I/O 控制器设计**
+## 2.4 I/O 控制器设计
 
-关键词：每I/O controller支持的磁盘数、数量(考虑到单点故障及性能)、队列深度、直通模式
+> 关键词：每I/O controller支持的磁盘数、数量(考虑到单点故障及性能)、队列深度、直通模式
 
-**首先，所选择的I/O controller一定要在VSAN兼容列表内**
+首先，所选择的I/O controller一定要在VSAN兼容列表内**
 
 VSAN支持多IO controller的ESXi主机，每个主机上最多35块硬盘(5个磁盘组，每个磁盘组7个hdd)。
 
@@ -229,9 +227,9 @@ VSAN 支持**RAID0和直通硬盘**。推荐使用直通（JBOD）模式，使�
 
 
 
-三、存储策略**
+# 三、存储策略**
 
-3.1 对象和组件**
+## 3.1 对象和组件**
 
 一个虚拟机由多个对象组成，例如一个VM主目录，vmdk文件，swap文件，快照文件。
 
@@ -241,7 +239,7 @@ VSAN 支持**RAID0和直通硬盘**。推荐使用直通（JBOD）模式，使�
 
 在VSAN 6.0中，决策方法变了。6.0中每个组件都含有一个**投票值**(a number of votes)，值>=1。然后，规则变为“**大于50%的投票**”做裁决。因此会出现多个组件分布式存储，没有仲裁，但是依然能够保实现容错。 **但是，通常在6.0中很多对象还是会有仲裁的**。
 
-3.2 存储策略中的设置**
+## 3.2 存储策略中的设置**
 
 关键词: 条带数、内存预留、强制置备不要随意使用！
 
@@ -366,7 +364,7 @@ esxcfg-advcfg -s 1 /VSAN/SwapThickProvisionDisabled 
 
 更多关于如何进行此高级设置，请看[此文章](http://www.jasemccarty.com/blog/vsan62-powercli-sparse-vswp/)。
 
-3.4 快照**
+## 3.4 快照
 
 关键词：快照会占用空间，在快照使用较多的环境请注意容量预留
 
@@ -374,7 +372,7 @@ esxcfg-advcfg -s 1 /VSAN/SwapThickProvisionDisabled 
 
 如果对虚机进行内存快照，则会产生内存快照文件，在VSAN5.5时，内存快照保存在namespace中，因为namespace有255G的限制，所以需要内存小于255的虚拟机才能完成内存快照操作。在VSAN6.0后，内存单独拿出来成为一个对象保存。在做VSAN设计时需要考虑到内存快照的容量。
 
-3.5 动态调整策略**
+## 3.5 动态调整策略
 
 VSAN支持动态调整策略，调整策略时**可能**会临时占用VSAN部分空间。如果系统资源不满足修改后的策略，reconfiguration会失败。
 
@@ -382,23 +380,23 @@ VSAN支持动态调整策略，调整策略时**可能**会临时占用VSAN部�
 
 但是如果修改了每对象磁盘带数，例如将1修改为2，很可能虚拟机对象的组件大小会发生变化，原来一个10G的组件可能拆分为两个5G的组件保存在不同的磁盘上。这时候，原虚拟机占用20G空间，调整策略时，临时会多占用20G空间。在策略应用完成后，原来的对象会被丢弃。
 
-3.6 有可用空间不代表可以置备出虚拟机**
+## 3.6 有可用空间不代表可以置备出虚拟机**
 
 VSAN的各种策略可能让虚拟机创建失败。例如磁盘不够时，每对象磁盘带数过大会导致置备失败。FTT结合每磁盘带数也可能导致置备失败。VSAN磁盘利用不均衡，导致实际可用磁盘数/主机数不能满足策略要求（有手动均衡磁盘利用的命令）。
 
-**四、主机设计**
+# 四、主机设计
 
-**4.1 CPU 设计**
+## 4.1 CPU 设计
 
 每主机CPU数，CPU核数，VM的vCPU需求量，vCPU-CPU融合比，为VSAN预留10%的CPU资源。
 
-4.2 内存设计**
+## 4.2 内存设计
 
 VM的内存需求量。当VSAN满配(5个磁盘组，每个磁盘组7块硬盘)时，需要至少32G内存。
 
-4.3 启动设备设计**
+## 4.3 启动设备设计
 
-关键词：建议使用 SATADOM作为 启动盘
+> 关键词：建议使用 SATADOM作为 启动盘
 
 **更多详细介绍见 [这里](https://blogs.vmware.com/virtualblocks/2016/03/18/virtual-san-design-considerations-for-booting-from-a-flash-device/) 以及 [这里](http://cormachogan.com/2015/02/24/vsan-considerations-when-booting-from-usbsd/)。**
 
@@ -408,17 +406,13 @@ RAM disk中，因此重启后日志就会丢失。
 
 VSAN环境下也不建议将日志放在VSAN存储上，因为如果VSAN存储故障，则上面的日志也会丢失，为未来排错造成困难。
 
-SATADOM 相比 SD 卡和 U 盘有更高的寿命和性能，所以日志可以保存在这些设备，但是对设备有些要求：容量>=16G，寿命： </span>512-1024 TBW _(VSAN6.1及之前) _/ 384 TBW_（VSAN 6.2） 。_
+SATADOM 相比 SD 卡和 U 盘有更高的寿命和性能，所以日志可以保存在这些设备，但是对设备有些要求：容量>=16G，寿命： </span>512-1024 TBW _(VSAN6.1及之前) _/ 384 TBW_（VSAN 6.2）
 
-。
-
-
-
-4.4 尽量不要使用只提供计算资源的主机**
+## 4.4 尽量不要使用只提供计算资源的主机
 
 因为VSAN有每主机最大组件数限制（VSAN5.5最大3000，6.0最大9000），所以可能置备的虚拟机数量会受到限制。
 
-4.5 刀片服务器及外置磁盘柜支持**
+## 4.5 刀片服务器及外置磁盘柜支持
 
 VSAN支持刀片服务器，但是受刀片服务器自身的限制，本地能够提供的容量有限。在VSAN 6.0之后开始支持外置磁盘柜，因此使用刀片服务器做VSAN变成一种可以落地的方案。如果机架式服务器本地硬盘有限，也可以外挂磁盘柜进行容量扩充。
 
@@ -426,17 +420,17 @@ VSAN 6.0支持的外置磁盘柜型号有限，如果需要使用此方案请务
 
 
 
-4.6 电源管理**
+## 4.6 电源管理
 
-关键词：建议关掉节能功能
+> 关键词：建议关掉节能功能
 
 电源管理会影响整体的性能，这个在虚拟化中一直被提及。当启用电源管理时，某些对处理性能延迟感知很明显的应用实际性能会不如预期。最佳时间建议将电源管理模式修改为'balanced'，避免服务器进入节能模式。 更多详细请看[https://kb.vmware.com/kb/1018206](https://kb.vmware.com/kb/1018206)
 
-**五、集群设计**
+# 五、集群设计
 
-**5.1 2/3 节点设计**
+## 5.1 2/3 节点设计
 
-关键词：建议一套VSAN环境至少配置4节点
+> 关键词：建议一套VSAN环境至少配置4节点
 
 VSAN支持2节点及3节点配置，这样的配置和4节点及以上的表现会不一样。尤其是，当有主机宕机后，没有富余的资源重建丢失的组件，来保证FTT，在单台主机故障期间，容不得再有任何故障发生，否则数据会丢失。
 
@@ -444,7 +438,7 @@ VSAN支持2节点及3节点配置，这样的配置和4节点及以上的表现�
 
 所以，我们建议VSAN环境至少4台主机起，且一定要有足够多的资源预留。
 
-5.2 vSphere HA**
+## 5.2 vSphere HA
 
 **VSAN可以和vSphere HA结合使用**。效果和使用传统存储时一样。
 
@@ -468,7 +462,7 @@ VSAN 和 vSphere HA是解耦和的，一般开启vSphere HA时，vSphere会检�
   
 
 
-5.3 故障域**
+## 5.3 故障域
 
 关键词：建议在较大环境(多个机柜)使用故障域
 
@@ -488,7 +482,7 @@ VSAN 和 vSphere HA是解耦和的，一般开启vSphere HA时，vSphere会检�
 
 
 
-5.4 去重和压缩设计**
+## 5.4 去重和压缩设计
 
 VSAN 全闪配置下支持去重和压缩。可以减少容量层磁盘空间的使用。它针对集群开启，只能在全闪配置下开启。
 
@@ -498,7 +492,7 @@ VSAN 全闪配置下支持去重和压缩。可以减少容量层磁盘空间的
 
 当在开启去重和压缩后，使用对象空间预留策略，那么预留的空间不会被进行压缩及去重。
 
-六、确定工作负载是否适合使用VSAN**
+# 六、确定工作负载是否适合使用VSAN
 
 关键词：在工作负载较重的场合，使用全闪存配置的VSAN
 
@@ -512,7 +506,7 @@ VSAN 全闪配置下支持去重和压缩。可以减少容量层磁盘空间的
 
 VSAN Ready Node 文档中介绍了Ready node服务器的一些参数，包括可以支撑的虚拟机数，能提供的IOPS等。
 
-七、使用 View planner 进行VSAN规划**
+# 七、使用 View planner 进行VSAN规划
 
 当 VSAN 用于 View 桌面环境时，可以使用View Planner 工具进行工作负载的模拟，进而得出较为真实合理的 VSAN 配置需求。
 
@@ -520,7 +514,7 @@ View planner可以模拟几种不同的工作场合(基础任务，办公，和�
 
 更多关于 View Planner 的信息请看[这里](http://www.vmware.com/products/view-planner.html)。View Planner 的使用案例请看[这里](https://labs.vmware.com/academic/publications/view-vmtj-winter2012)。
 
-八、VMware infrastructure Planner - VIP**
+# 八、VMware infrastructure Planner - VIP
 
 当前很多企业使用了 VMware 服务器虚拟化，更进一步，可能会发展成虚拟化、池化和自动化，即SDDC。
 
@@ -528,7 +522,7 @@ VMware Infrastructure Planner 可以收集一个虚拟化环境中各种资源�
 
 更多软件信息请看[这里](http://www.vmware.com/products/infrastructure-planner.html)。
 
-九、设计案例一**
+# 九、设计案例一
 
 客户计划部署100台虚拟机，使用混合配置。
 
@@ -634,7 +628,7 @@ VSAN 6.0支持每主机最大9000个组件。
 
  
 
-十、规划实例2**
+# 十、规划实例二
 
 
 
@@ -903,15 +897,15 @@ witness ）*2 = 14
 
 使用全闪配置时，容量需求会小很多，且SSD单盘容量可以很大，因此能非常容易地满足需求。
 
-十一、下面是一些网站链接：**
+# 十一、下面是一些网站链接：
 
 
 
-VMware Ready Nodes
+## VMware Ready Nodes
 
 [http://www.vmware.com/resources/compatibility/search.php?deviceCategory=vsan](http://www.vmware.com/resources/compatibility/search.php?deviceCategory=vsan)
 
-VMware 兼容性指南
+## VMware 兼容性指南
 
  [http://vmwa.re/vsanhclc](http://vmwa.re/vsanhclc)
 
@@ -919,7 +913,7 @@ VMware 兼容性指南
 
  [https://communities.vmware.com/community/vmtn/vsan](https://communities.vmware.com/community/vmtn/vsan)
 
-博客
+## 博客
 
  [http://cormachogan.com/vsan/](http://cormachogan.com/vsan/)
 
@@ -933,13 +927,13 @@ VMware 兼容性指南
 
  [http://www.thenicholson.com/vsan](http://www.thenicholson.com/vsan)
 
-文档库
+## 文档库
 
  [http://www.vmware.com/products/virtual-san/resources.html ](http://www.vmware.com/products/virtual-san/resources.html)
 
  [https://www.vmware.com/support/virtual-san](https://www.vmware.com/support/virtual-san)
 
-VMware 支持
+## VMware 支持
 
  [https://my.vmware.com/web/vmware/login](https://my.vmware.com/web/vmware/login)
 
@@ -947,13 +941,13 @@ VMware 支持
 
  [http://kb.vmware.com/kb/1021806](http://kb.vmware.com/kb/1021806) - VMware 产品位置
 
-日志文件
+## 日志文件
 
  [http://kb.vmware.com/kb/2032076](http://kb.vmware.com/kb/2032076) - ESXi 5.x 日志文件
 
  [http://kb.vmware.com/kb/2072796](http://kb.vmware.com/kb/2072796) - 收集 Virtual SAN 支持日志
 
-更多阅读
+## 更多阅读
 
  [http://blogs.vmware.com/vsphere/files/2014/09/vsan-sql- dvdstore-perf.pdf ](http://blogs.vmware.com/vsphere/files/2014/09/vsan-sql-dvdstore-perf.pdf)- Microsoft SQL Server 性能学习
 
