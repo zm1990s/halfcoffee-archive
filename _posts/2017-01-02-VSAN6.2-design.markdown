@@ -5,6 +5,8 @@ date:   2017-01-02
 categories: VSAN
 tags: VSAN 6.2
 ---
+* content
+{:toc}
 
 
 此文章假设读者已有基础VSAN知识或实施经验。
