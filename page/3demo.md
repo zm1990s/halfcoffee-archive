@@ -1,5 +1,5 @@
 ---
-layout: demo
+layout: page
 title: 演示
 permalink: /demo/
 icon: play
@@ -15,10 +15,4 @@ type: page
 ## NSX
 
 * [NSX 功能演示]("http://www.halfcoffee.com/demo/VMware NSX - Offline Demo.htm") 
-
-
-## Comments
-
-{% include comments.html %}
-
 

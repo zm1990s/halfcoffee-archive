@@ -1,3 +1,11 @@
+---
+layout: post
+title:  "VSAN 6.2 设计指南"
+date:   2017-01-02
+categories: VSAN
+tags: VSAN 6.2
+---
+
 参考资料： virtual-san-6.2-design-and-sizing-guide，本文几乎是原文的缩减译文，有点长，但是值得学习...
 
 此文章假设读者已有基础VSAN知识或实施经验。
