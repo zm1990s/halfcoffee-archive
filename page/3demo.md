@@ -14,5 +14,5 @@ type: page
 
 ## NSX
 
-* [NSX 功能演示]("http://www.halfcoffee.com/demo/VMware NSX - Offline Demo.htm") 
+* [NSX 功能演示](http://www.halfcoffee.com/demo/NSX.htm) 
 
