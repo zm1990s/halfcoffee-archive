@@ -1,4 +1,4 @@
-# 此主题来源为：[http://gaohaoyang.github.io/](http://gaohaoyang.github.io/)
+## 此主题来源为：[http://gaohaoyang.github.io/](http://gaohaoyang.github.io/)
 以下内容为原中文 README，留下来自己使用。
 
 ## 目录
