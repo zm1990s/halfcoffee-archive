@@ -4,8 +4,8 @@ layout: default
 
 <div class="page clearfix" index>
     <div class="left">
-        <h1>Welcome to HyG's Blog!</h1>
-        <small>这里记录着我的前端学习之路</small>
+        <h1>Half Coffee Blog!</h1>
+        <small>我热爱的一切东西~</small>
         <hr>
         <ul>
             {% for post in paginator.posts %}
@@ -37,7 +37,7 @@ layout: default
                     {{post.excerpt}}
                 </div>
                 <div class="read-all">
-                    <a  href="{{ post.url | prepend: site.baseurl }}"><i class="fa fa-newspaper-o"></i>Read All</a>
+                    <a  href="{{ post.url | prepend: site.baseurl }}"><i class="fa fa-newspaper-o"></i>查看原文</a>
                 </div>
                 <hr>
               </li>
