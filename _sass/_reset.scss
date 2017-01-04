@@ -49,20 +49,20 @@ hr {
 
 ///////////
 h1 {
-    font-size: 36px;
+    font-size: 34px;
 }
 h2 {
-    font-size: 30px;
+    font-size: 28px;
     border-bottom: 1px solid #eee;
 }
 h3 {
-    font-size: 26px;
+    font-size: 24px;
 }
 h4 {
-    font-size: 22px;
+    font-size: 21px;
 }
 h5 {
-    font-size: 20px;
+    font-size: 19px;
 }
 h6 {
     font-size: 18px;
@@ -76,7 +76,7 @@ h6 {
 }
 blockquote {
     color: #444;
-    border-left: 5px solid #ebf0f5;
+    border-left: 5px solid #D6DBDF;
     padding-left: 15px;
     background: rgba(112,138,153,.1);
     padding: 10px 20px;
@@ -105,7 +105,7 @@ table {
                 background-color: #fffcf5;
             }
             &:nth-of-type(2n) {
-                background-color: #fffcf7;
+                background-color: #fffcf8;
             }
         }
     }
