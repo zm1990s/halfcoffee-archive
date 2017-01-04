@@ -27,9 +27,9 @@ html {
     height: 100%;
 }
 body {
-    font-family: 'Helvetica Neue',Helvetica,Arial,'Microsoft YaHei',sans-serif;
+    font-family: 'Helvetica Neue',Helvetica,Arial,'STXihei','SimHei',sans-serif;
     color: #333;
-    background-image: url(https://ooo.0o0.ooo/2016/06/20/5768c606cf9cb.jpg);
+    background-image: url(https://www.halfcoffee.com/backgroud.jpg);
     position: relative;
     min-height: 100%;
     padding-bottom: 190px;
@@ -102,7 +102,7 @@ table {
     tbody {
         tr {
             &:nth-of-type(2n+1) {
-                background-color: #f8f8fd;
+                background-color: #fffcf5;
             }
             &:nth-of-type(2n) {
                 background-color: #e5eaed;

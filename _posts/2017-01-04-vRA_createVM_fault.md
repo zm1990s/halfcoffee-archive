@@ -12,7 +12,7 @@ tags: vsphere vmware 7.0 automation vRealize
 
 ## 问题描述
 
-原vSphere环境中，只有一个集群加入了vRealize Automation的计算资源中，但因为系统扩容，新建了一个集群，为了统一管理，在vRealize automation在<span style="color:blue;">*架构组*</span>下勾选了此新集群（Compute Resources）。
+原vSphere环境中，只有一个集群加入了vRealize Automation的计算资源中，但因为系统扩容，新建了一个集群，为了统一管理，在vRealize automation在**架构组**下勾选了此新集群（Compute Resources）。
 
 按照Unified Portal的工作流程，要求接下来创建 **预留策略** > **网络配置文件**  > **预留** ，我按照VMware的说法，创建了同名的预留策略和预留（假设名为 res-test ），因为当时网络环境（NSX未安装到新集群）尚未具备，但是在设置中可以选择NSX的端口组进行关联。创建完预留后vRA出现错误警告，然后预留无法再进行编辑（会提示错误），且删除也报错。
 
