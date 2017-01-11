@@ -34,7 +34,7 @@ Generation Number:          0
 Edge Active:                No
 ```
 
-3、运行`net-vdr --route  *DLR名称* -l` 查看详细路由信息
+3、运行`net-vdr --route DLR_name -l` 查看详细路由信息
 
 ```
 [root@ESXi1:~] net-vdr --route  default+edge-cd4d8d68-9444-421d-9260-513106a2123d -l
@@ -49,7 +49,6 @@ Destination      GenMask          Gateway          Flags    Ref Origin   UpTime 
 172.16.1.0       255.255.255.248  0.0.0.0          UCI      1   MANUAL   11251      139200000002
 192.168.10.0     255.255.255.0    0.0.0.0          UCI      1   MANUAL   11715      13920000000a
 192.168.11.0     255.255.255.0    0.0.0.0          UCI      1   MANUAL   11699      13920000000b
-
 ```
 
 
