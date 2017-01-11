@@ -16,8 +16,12 @@ type: page
 ## 关于作者
 * 系统集成行业，对商业化网络及虚拟化产品有较多接触。
 * 业余时间看看书、喝喝咖啡、看看电影、听听音乐
+* 热爱开源及知识共享
 
 ## 关于此博客
-* 此博客使用 Github 的 Pages 进行托管
+* 此博客使用 Github 的 Pages 进行托管，使用Typora编写文章
 * 主题来源于：[Gaohaoyang](https://github.com/Gaohaoyang)
+
+##原博客地址
+原博客上很多文章尚未转移到这边来，地址为：[链接](http://bandari.fans.blog.163.com)
 
