@@ -22,6 +22,6 @@ type: page
 * 此博客使用 Github 的 Pages 进行托管，使用Typora编写文章
 * 主题来源于：[Gaohaoyang](https://github.com/Gaohaoyang)
 
-##原博客地址
+## 原博客地址
 原博客上很多文章尚未转移到这边来，地址为：[链接](http://bandari.fans.blog.163.com)
 
