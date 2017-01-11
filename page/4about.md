@@ -6,7 +6,7 @@ icon: heart
 type: page
 ---
 
-* 目录
+* content
 {:toc}
 
 ## 为什么写博客
