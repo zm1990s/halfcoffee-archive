@@ -6,7 +6,7 @@ icon: heart
 type: page
 ---
 
-* content
+* 目录
 {:toc}
 
 ## 为什么写博客
@@ -21,8 +21,3 @@ type: page
 * 此博客使用 Github 的 Pages 进行托管
 * 主题来源于：[Gaohaoyang](https://github.com/Gaohaoyang)
 
-
-
-## Comments
-
-{% include comments.html %}
