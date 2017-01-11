@@ -27,6 +27,16 @@ type: page
 
 为方便墙内用户，已上传到博客： [下载链接](http://www.halfcoffee.com/tools/yVM.ova)
 
+# 网址
+
+VMware产品间兼容列表查询：
+
+[链接](http://www.vmware.com/resources/compatibility/sim/interop_matrix.php#interop&2=&93=)
+
+VMware VSAN 硬件兼容性列表：
+
+[链接](http://www.vmware.com/resources/compatibility/search.php?deviceCategory=vsan)
+
 
 
 
