@@ -43,8 +43,6 @@ Dead 时间表示多久内未收到邻居的Hello包，就将邻居标记为Down
                      [110/21] via 24.1.1.2, 00:00:00, Ethernet0/0
 
 
-
-
        IOU4#show ip route 
     Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
            o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
@@ -52,6 +50,8 @@ Dead 时间表示多久内未收到邻居的Hello包，就将邻居标记为Down
     
           1.0.0.0/32 is subnetted, 1 subnets
     O        1.1.1.1  [110/21] via 24.1.1.2, 00:00:00, Ethernet0/0
+
+
 
 在IOU4 上长 ping IOU1，当断开IOU1 的E0/0后(模拟端口故障)，实际丢包约5秒左右，从系统提示可以看到检测到链路down之后，ospf协议立刻进行了收敛
 
