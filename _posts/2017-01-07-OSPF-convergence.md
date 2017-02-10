@@ -27,7 +27,9 @@ Dead 时间表示多久内未收到邻居的Hello包，就将邻居标记为Down
 
 拓扑图如下：
 
-![pic](/pics/ospf-conv1.png| width=100)
+<img src="/pics/ospf-conv1.png" width="100">
+
+![pic](/pics/ospf-conv1.png | width=100)
 
 这是一个简单的路由结构，所有接口为三层口。我们测试在这种结构下，IOU1的E0/0挂掉后，IOU4与IOU1的通信中断时间。
 
@@ -65,7 +67,7 @@ Dead 时间表示多久内未收到邻居的Hello包，就将邻居标记为Down
 
 下面我们在上面的环境中，引入三层交换机常见的一种路由连接模式，即物理接口是Access或者Trunk二层模式，而在交换机上配置SVI（交换机虚拟端口）进行三层通信，拓扑如下图：
 
-![pic](/pics/ospf-conv3.png| width=100)
+![pic](/pics/ospf-conv3.png | width=100)
 
 在IOU4 上长 ping IOU1，当断开IOU1 的E0/0后(模拟端口故障)，实际丢包约42秒左右，从系统提示可以看到检测到链路down之后，邻居状态依然正常，只有等40S后系统提示邻居Dead，路由才收敛，网络通信才正常
 
