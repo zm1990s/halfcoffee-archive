@@ -121,9 +121,9 @@ NSX 只支持三种认证模式和一种配置办法，即**空认证、明文�
 
 1、 [OSPFv2 Authentication Confusion](http://packetlife.net/blog/2010/jun/1/ospfv2-authentication-confusion/)
 
-2、[OSPF header checksum](https://learningnetwork.cisco.com/message/393900#393900)
+2、 [OSPF header checksum](https://learningnetwork.cisco.com/message/393900#393900)
 
-3、[Configuration Examples for OSPFv2 Cryptographic Authentication](http://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_ospf/configuration/xe-3s/iro-xe-3s-book/iro-ospfv2-crypto-authen-xe.html#reference_1E9C132BB5EE4550AA841075A95EBB90)
+3、 [Configuration Examples for OSPFv2 Cryptographic Authentication](http://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_ospf/configuration/xe-3s/iro-xe-3s-book/iro-ospfv2-crypto-authen-xe.html#reference_1E9C132BB5EE4550AA841075A95EBB90)
 
 
 
