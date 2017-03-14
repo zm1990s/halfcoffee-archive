@@ -9,7 +9,7 @@ tags: vsphere vmware 6.0 VSAN esxcli
 * content
 {:toc}
 
->现象：在生产环境使用vSphere6.0(u1b及u2)后，出现过至少**4次 ESXi 主机从vCenter断开(vCenter上显示主机已断开)**，这时 ESXi 主机上的**虚拟机运行正常**，但是无法通过web client以及vSphere client登录主机进行管理，ESXi 的 esxcli 和 ssh 均能正常运行。在使用传统EMC存储以及VSAN时均遇到过此问题。
+>现象：在生产环境使用vSphere6.0(u1b及u2)后，出现过至少**4次 ESXi 主机从vCenter断开(vCenter上显示主机未响应)**，这时 ESXi 主机上的**虚拟机运行正常**，但是无法通过web client以及vSphere client登录主机进行管理，ESXi 的 esxcli 和 ssh 均能正常运行。在使用传统EMC存储以及VSAN时均遇到过此问题。
 
 
 
