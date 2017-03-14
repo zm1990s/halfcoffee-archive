@@ -2,7 +2,7 @@
 layout: post
 title:  "H3C，Huawei，Cisco OSPF 认证对接"
 date:   2016-12-10
-categories: ospf
+categories: OSPF
 tags: ospf 认证 排错 huawei 华三 cisco
 ---
 
