@@ -4,13 +4,14 @@ title:  "NSX Edge与物理交换机OSPF认证配置"
 date:   2017-03-14
 categories: NSX
 tags: vsphere vmware NSX cisco auth ospf
+typora-root-url: ../../halfcoffee
 ---
 
 * content
 {:toc}
 
 
-> 摘要：在一个客户现场，用户为 OSPF 启用了区域认证，在以前只有交换机参与路由的时候，OSPF 邻居都能正常建立，但是加入 NSX Edge 之后，发现 NSX 和交换机的认证配置方法略微“不一样”，这篇文章会介绍下OSPFv2的认证方法并解决上述问题。
+> 摘要：用户为 OSPF 启用了区域认证，在以前只有交换机参与路由的时候，OSPF 邻居都能正常建立，但是加入 NSX Edge 之后，发现 NSX 和交换机的认证配置方法略微“不一样”，这篇文章会介绍下OSPFv2的认证方法并解决上述问题。
 
 ## OSPFv2 的认证模式
 
@@ -117,7 +118,7 @@ NSX 只支持三种认证模式和一种配置办法，即**空认证、明文�
 
 
 
-## 参考文章：
+## 参考文章
 
 1、 [OSPFv2 Authentication Confusion](http://packetlife.net/blog/2010/jun/1/ospfv2-authentication-confusion/)
 
