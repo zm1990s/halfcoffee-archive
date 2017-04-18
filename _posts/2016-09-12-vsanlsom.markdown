@@ -17,7 +17,7 @@ typora-root-url: ../../halfcoffee
 
 
 
-## **参数1：全闪配置下 SSD 写缓存最大容量限制**
+## 参数1：全闪配置下 SSD 写缓存最大容量限制
 
 参数信息：
 
@@ -52,7 +52,7 @@ esxcfg-advcfg -s 1000 /LSOM/ssdWbSize //将默认的 600G 写缓存限制修改�
 
 
 
-## **参数2：SSD 读写缓存 3/7 调整**
+## 参数2：SSD 读写缓存 3/7 调整
 
 参数信息：
 ```
@@ -75,7 +75,9 @@ esxcfg-advcfg -s 40 /LSOM/ssdWbSize
 //将默认的 7/3 改成 6/4
 ```
 
-## **参数3：组件状态 absent 之后 rebuild 时间**
+
+
+## 参数3：组件状态 absent 之后 rebuild 时间
 
 参数信息：
 
@@ -108,7 +110,9 @@ esxcfg-advcfg -s 10 /VSAN/ClomRepairDelay
 //组件absent状态后 rebuild 时间，默认为60分钟，此处修改为10分钟
 ```
 
-## **参数4：磁盘利用率超过80之后 Rebalance**
+
+
+## 参数4：磁盘利用率超过80之后 Rebalance
 
 参数信息：
 
@@ -132,7 +136,9 @@ esxcfg-advcfg -s 90 /VSAN/ClomRebalanceThreshold
 //修改为磁盘利用率达到 90% 时才 Rebalance
 ```
 
-## **参数5：在混合 Hybrid 模式下开启 RAID5/6	**
+
+
+## 参数5：在混合 Hybrid 模式下开启 RAID5/6	
 
 参数信息：
 
@@ -156,9 +162,9 @@ esxcfg-advcfg -s 1 /VSAN/ClomEnableRaidECHybrid
 //开启 Hybrid 配置下的RAID5/6功能
 ```
 
-****
 
-## **参数6：每主机支持的最大组件数**
+
+## 参数6：每主机支持的最大组件数
 
 参数信息：
 
@@ -182,7 +188,9 @@ esxcfg-advcfg -s 10000 /VSAN/MaxComponentsPerHost
 //将默认的9000限制修改为10000
 ```
 
-## **参数7：将swap文件的厚置备改为精简置备**
+
+
+## 参数7：将swap文件的厚置备改为精简置备
 
 参数信息：
 
@@ -208,9 +216,7 @@ esxcfg-advcfg -s 1 /VSAN/SwapThickProvisionDisabled
 
 
 
-
-
-## **参数8：修改每对象的最大值255**
+## 参数8：修改每对象的最大值255
 
 参数信息：
 ```
