@@ -46,7 +46,11 @@ Logical storage constructs for grouping of virtual volumes.
 
 一个storage container可以同时被多个PE访问
 
+---
 
+这里有个Datastore的概念，本来可以直接做对象存储，但是vSphere的部分功能例如DRS只能识别Datastore，所以讲抽象的东西具体化了
+
+---
 
 ### 3. Protocol Endpoint
 
@@ -62,7 +66,7 @@ Logical storage constructs for grouping of virtual volumes.
 
 ---
 
-PE 支持一下SAN和NAS协议： iSCSI ，NFSv3，FC，FCoE
+PE 支持以下SAN和NAS协议： iSCSI ，NFSv3，FC，FCoE
 
 支持现有的多路径策略
 

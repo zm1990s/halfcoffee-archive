@@ -37,7 +37,9 @@ VMware VSAN 硬件兼容性列表：
 
 [链接](http://www.vmware.com/resources/compatibility/search.php?deviceCategory=vsan)
 
+VMware HOL 文档链接：
 
+http://docs.hol.vmware.com/
 
 
 
