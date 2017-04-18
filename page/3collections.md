@@ -39,7 +39,16 @@ VMware VSAN 硬件兼容性列表：
 
 VMware HOL 文档链接：
 
-http://docs.hol.vmware.com/
+[http://docs.hol.vmware.com/](http://docs.hol.vmware.com/)
 
 
 
+VCSA 6.5 HA 安装配置
+
+[https://esxsi.com/2016/11/22/vcsa65-ha/](https://esxsi.com/2016/11/22/vcsa65-ha/)
+
+
+
+vSphere replication 6.x安装配置手册
+
+http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/
