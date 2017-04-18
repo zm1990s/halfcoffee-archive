@@ -1,0 +1,238 @@
+---
+layout: post
+title:  "VSAN 高级参数介绍（测试用）"
+date:   2016-09-12 15:14:54
+categories: VSAN
+tags: VSAN LSOM vsish
+typora-root-url: ../../halfcoffee
+---
+
+* content
+{:toc}
+>  VSAN 的策略驱动让我们看到了VSAN无穷的潜力，其设计思路相当新颖，在一个基础资源池上使用策略就能实现不同对象的区分服务，而目前没有其他厂家能到VMware这样的高度。
+
+>  VSAN 呈现给用户配置很简单，但实际上设计及后台比较复杂。笔者无意间发现了VSAN的隐藏高级参数设置，有很多好玩的选项想分享出来。这些参数全部是针对每主机进行设置的。VSAN 中有很多默认设置，这些设置应该都是研发人员多次测试得出的最优值，修改可能导致环境异常，并不建议修改！
+
+风险提醒：请务必在实验环境中使用，使用需谨慎，数据无价。
+
+
+
+## **参数1：全闪配置下 SSD 写缓存最大容量限制**
+
+参数信息：
+
+```
+vsish
+
+/> cat /config/LSOM/intOpts/ssdWbSizeCap
+
+Vmkernel Config Option {
+
+   Default value:600
+
+   Min value:100
+
+   Max value:1600
+
+   Current value:600
+
+   hidden config option:1
+
+   Description:SSD Write Buffer size cap in GB
+
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 1000 /LSOM/ssdWbSize //将默认的 600G 写缓存限制修改为 1TB
+```
+
+
+
+
+## **参数2：SSD 读写缓存 3/7 调整**
+
+参数信息：
+```
+vsish
+/> cat /config/LSOM/intOpts/ssdWbSize
+Vmkernel Config Option {
+   Default value:30
+   Min value:10
+   Max value:90
+   Current value:30
+   hidden config option:1
+   Description:SSD Write Buffer size in percentage
+```
+
+
+修改方法
+
+```
+esxcfg-advcfg -s 40 /LSOM/ssdWbSize  
+//将默认的 7/3 改成 6/4
+```
+
+## **参数3：组件状态 absent 之后 rebuild 时间**
+
+参数信息：
+
+```
+vsish
+
+/> cat /config/VSAN/intOpts/ClomRepairDelay
+
+Vmkernel Config Option {
+
+   Default value:60
+
+   Min value:0
+
+   Max value:4294967295
+
+   Current value:60
+
+   hidden config option:0
+
+   Description:Minutes to wait for absent components to come back before starting repair
+
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 10 /VSAN/ClomRepairDelay
+//组件absent状态后 rebuild 时间，默认为60分钟，此处修改为10分钟
+```
+
+## **参数4：磁盘利用率超过80之后 Rebalance**
+
+参数信息：
+
+```
+vsish
+/> cat /config/VSAN/intOpts/ClomRebalanceThreshold
+Vmkernel Config Option {
+   Default value:80
+   Min value:0
+   Max value:100
+   Current value:80
+   hidden config option:0
+   Description:Percentage disk fullness after which rebalancing is triggered
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 90 /VSAN/ClomRebalanceThreshold
+//修改为磁盘利用率达到 90% 时才 Rebalance
+```
+
+## **参数5：在混合 Hybrid 模式下开启 RAID5/6	**
+
+参数信息：
+
+```
+vsish
+/> cat /config/VSAN/intOpts/ClomEnableRaidECHybrid
+Vmkernel Config Option {
+   Default value:0
+   Min value:0
+   Max value:1
+   Current value:1
+   hidden config option:1
+   Description:Enable raid5/6 on hybrid diskgroups
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 1 /VSAN/ClomEnableRaidECHybrid
+//开启 Hybrid 配置下的RAID5/6功能
+```
+
+****
+
+## **参数6：每主机支持的最大组件数**
+
+参数信息：
+
+```
+vsish
+/> cat /config/VSAN/intOpts/MaxComponentsPerHost
+Vmkernel Config Option {
+   Default value:9000
+   Min value:1
+   Max value:15000
+   Current value:9000
+   hidden config option:1
+   Description:Maximum amount of components per VSAN host
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 10000 /VSAN/MaxComponentsPerHost
+//将默认的9000限制修改为10000
+```
+
+## **参数7：将swap文件的厚置备改为精简置备**
+
+参数信息：
+
+```
+vsish
+/> cat /config/VSAN/intOpts/SwapThickProvisionDisabled
+Vmkernel Config Option {
+   Default value:0
+   Min value:0
+   Max value:1
+   Current value:0
+   hidden config option:1
+   Description:Turn off default thick provisioning type for VM swap object and allow user to control the provisioning type using policy.
+}
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 1 /VSAN/SwapThickProvisionDisabled
+//启用swap文件的精简置备
+```
+
+
+
+
+
+## **参数8：修改每对象的最大值255**
+
+参数信息：
+```
+vsish
+
+/> cat /config/VSAN/intOpts/ClomMaxComponentSizeGB
+Vmkernel Config Option {
+   Default value:255
+   Min value:180
+   Max value:255
+   Current value:255
+   hidden config option:0
+   Description:Maximum component size used for new placements)
+}
+
+```
+
+修改方法
+
+```
+esxcfg-advcfg -s 180 /VSAN/ClomMaxComponentSizeGB
+//每个组件最大值从255修改为180
+```
+
+**就介绍这几个，更多的隐藏设置可以在/config/LSOM/intOpts//config/VSAN/intOpts/中找到。**
