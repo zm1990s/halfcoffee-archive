@@ -1,16 +1,22 @@
 ---
 layout: post
-title:  "hello jekyll!"
-date:   2015-02-10 15:14:54
-categories: jekyll
-tags: jekyll
-excerpt: jekyll 的 Hello World！
+title:  "NSX 排错：Controller Cluster失效后影响什么  "
+date:   2016-10-06 15:14:54
+categories: NSX
+tags: NSX Controller cluster failed 失效
+
 typora-root-url: ../../halfcoffee
 ---
 
 * content
 {:toc}
 > Controller 在 NSX 中是比较重要的组件，在创建LSW之前必须先建立好Controller集群，建议至少、且最多部署三个Controller，分别运行在不同的主机上。
+
+NSX Controller Cluster失效后，在vCenter Web Client的网络和安全>安装>主机准备>Communication Channel Health 可以看到下列显示:
+
+<img src="/pics/nsx-contfails.png" width="700">
+
+
 
 **1、失去所有Controller之后，最直观的就是无法创建或者修改LSW。**
 
