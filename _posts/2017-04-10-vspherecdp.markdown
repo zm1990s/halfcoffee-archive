@@ -15,14 +15,16 @@ typora-root-url: ../../halfcoffee
 
 全为 0 的 MAC 在正常的理解中是不合规的 MAC 地址，但是在交换机上查看mac地址表确实有此mac。但是关联在VLAN 1 下。
 
-``` dis mac-address table
-<Huawei>dis mac address-table
+```
+dis mac-address table
+ <Huawei>dis mac address-table
         Mac Address Table
 -------------------------------------------
 
 Vlan    Mac Address       Type        Ports
 ----    -----------       --------    -----
- 1    0000.0000.0000    dynamic      G1/1/0/47
+ 1    0000.0000.0000    dynamic      G1/1/0/47 
+ 
 ```
 
 
