@@ -10,11 +10,12 @@ typora-root-url: ../../halfcoffee
 * content
 {:toc}
 
-<img src="/pics/lunmount.jpg" width="500">
 
 > 摘要：一套vSphere环境断电，物理硬件全部恢复后发现vCenter没有自动开机，排查后发现所有主机的上某个LUN都处于非活动（已卸载）状态。
 
 ## 问题现象
+
+<img src="/pics/lunmount.jpg" width="500">
 
 登陆所有ESXi，在数据存储中可以看到此LUN为非活动状态，但是查看此LUN的路径全部是**活动**的（同存储上其他LUN在主机上均可以正常挂载使用，登陆存储未看到异常报警），重新扫描所有无法解决此问题，通过vSphere Client 选中此LUN执行**挂载**操作会报未知错误。
 

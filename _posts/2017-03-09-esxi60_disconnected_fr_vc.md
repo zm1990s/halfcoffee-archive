@@ -3,7 +3,7 @@ layout: post
 title:  "ESXi 6.0 从 vCenter断开且不能登录管理解决办法"
 date:   2017-03-09
 categories: vSphere
-tags: vsphere vmware 6.0 VSAN esxcli
+tags: vsphere vmware 6.0 VSAN esxcli 排错 troubleshooting
 ---
 
 * content

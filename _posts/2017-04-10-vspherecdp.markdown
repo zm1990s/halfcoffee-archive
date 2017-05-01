@@ -3,7 +3,7 @@ layout: post
 title:  "vSphere 下交换机报00:00:00:00:00:00全零MAC Flapping"
 date:   2017-04-10 15:14:54
 categories: vSphere
-tags: vSphere Cisco CDP 邻居发现协议 mac flapping
+tags: vSphere Cisco CDP 邻居发现协议 mac flapping 排错 troubleshooting
 typora-root-url: ../../halfcoffee
 ---
 
