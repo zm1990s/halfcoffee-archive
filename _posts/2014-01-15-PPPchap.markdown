@@ -18,7 +18,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 ## Cisco 的举例
 
 ```
-** Router 1 ** 
+Router 1:
  hostname r1 
  ! 
  username r2 password 0 cisco 
@@ -42,7 +42,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
  !
 ```
 ```
-Router 2
+Router 2:
  hostname r2
  ! 
  username alias-r1 password 0 cisco 
