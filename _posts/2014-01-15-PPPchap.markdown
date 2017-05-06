@@ -87,11 +87,12 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 2. R2 收到call后，会challenges R1 ，默认会发送一个challenge包，里面有
 
    - 01 = challenge packet type identifier.
-
-
-- ID = 标识Challenge包的序列号
+   - ID = 标识Challenge包的序列号
    - random =一个随机数
+
+
    - r2 =challenger 的认证用户名（也就是hostname），是用来标示自己的
+
 
 3. Router 1收到 Router 2's challenge ，在自己用户名中找 username "r2"
 
