@@ -17,66 +17,54 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 
 ## Cisco 的举例
 
-> **Router 2**
->
->  hostname r1 
->  ! 
->  username r2 password 0 cisco 
->
-> ! -- Hostname of other router and shared secret
->
->  ! 
->  interface BRI0/0 
->   ip address 20.1.1.1 255.255.255.0 
->   no ip directed-broadcast 
->   encapsulation ppp 
->   dialer map ip 20.1.1.2 name r2 broadcast 5772222 
->   dialer-group 1 
->   isdn switch-type basic-5ess 
->   ppp authentication chap callin 
->
-> ! -- Authentication on incoming calls only
-> ！收到Challenge包可视为需要Authentication
->
->
->   ppp chap hostname alias-r1 
->
-> ! -- Alternate CHAP hostname
->
->  ! 
->  access-list 101 permit ip any any 
->  dialer-list 1 protocol ip list 101 
->  !
-
-
-
-> **Router 2**
->
->  hostname r2
->  ! 
->  username alias-r1 password 0 cisco 
->
-> ! -- Alternate CHAP hostname and shared secret.
->  ! -- The username must match the one in the ppp chap hostname 
->  ! -- command on the remote router.
->
->  !
->  interface BRI0/0 
->   ip address 20.1.1.2 255.255.255.0 
->   no ip directed-broadcast
->   encapsulation ppp 
->   dialer map ip 20.1.1.1 name 
->   alias-r1 broadcast 5771111
->
-> ! -- Dialer map name matches alternate hostname "alias-r1".
->
->   dialer-group 1 
->   isdn switch-type basic-5ess 
->   ppp authentication chap
->  ! 
->  access-list 101 permit ip any any 
->  dialer-list 1 protocol ip list 101 
->  !
+```
+** Router 1 ** 
+ hostname r1 
+ ! 
+ username r2 password 0 cisco 
+! -- Hostname of other router and shared secret
+ ! 
+ interface BRI0/0 
+  ip address 20.1.1.1 255.255.255.0 
+  no ip directed-broadcast 
+  encapsulation ppp 
+  dialer map ip 20.1.1.2 name r2 broadcast 5772222 
+  dialer-group 1 
+  isdn switch-type basic-5ess 
+  ppp authentication chap callin 
+! -- Authentication on incoming calls only
+！收到Challenge包可视为需要Authentication
+  ppp chap hostname alias-r1 
+! -- Alternate CHAP hostname
+ ! 
+ access-list 101 permit ip any any 
+ dialer-list 1 protocol ip list 101 
+ !
+```
+```
+Router 2
+ hostname r2
+ ! 
+ username alias-r1 password 0 cisco 
+! -- Alternate CHAP hostname and shared secret.
+ ! -- The username must match the one in the ppp chap hostname 
+ ! -- command on the remote router.
+ !
+ interface BRI0/0 
+  ip address 20.1.1.2 255.255.255.0 
+  no ip directed-broadcast
+  encapsulation ppp 
+  dialer map ip 20.1.1.1 name 
+  alias-r1 broadcast 5771111
+! -- Dialer map name matches alternate hostname "alias-r1".
+  dialer-group 1 
+  isdn switch-type basic-5ess 
+  ppp authentication chap
+ ! 
+ access-list 101 permit ip any any 
+ dialer-list 1 protocol ip list 101 
+ !
+```
 
 <img src="/pics/ppp_callin_hostname2.gif" width="700">
 
