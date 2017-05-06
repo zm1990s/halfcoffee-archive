@@ -91,7 +91,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
    - random =一个随机数
 
 
-   - r2 =challenger 的认证用户名（也就是hostname），是用来标示自己的
+- r2 =challenger 的认证用户名（也就是hostname），是用来标示自己的
 
 
 3. Router 1收到 Router 2's challenge ，在自己用户名中找 username "r2"
@@ -118,13 +118,11 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 
    下面实验只是单向认证，但是完全理解后，双向认证也不难，只需双方要求认证，hostname是对方的hostname，两边密码相同，如文章开头所说。我觉得配置会出错的，就是上面的两句话。
 
+## 实验验证
 
 
 
-
-   ## 实验验证
-
-   ### **（1）**
+### （1）
 
    R1：
 
@@ -222,7 +220,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 
    ​
 
-   ### **（3）**
+### （3）
 
    R1: username R2 password cisco 
 
@@ -282,7 +280,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
    Mar  1 01:03:07.599: Se0/0 CHAP: I SUCCESS id 20 len 4
    ```
 
-### **（4）**
+### （4）
 
 R1 ：
 
@@ -298,7 +296,7 @@ R2：
 
 实验测试可认证成功
 
-**（5）**
+### （5）
 
 R1：
 
@@ -314,7 +312,7 @@ R2 ：
 
 实验测试可认证成功
 
-### **（6）**
+### （6）
 
 R1： username R2 password cisco 
 
