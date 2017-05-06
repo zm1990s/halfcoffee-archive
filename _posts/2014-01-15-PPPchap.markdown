@@ -9,9 +9,6 @@ typora-root-url: ../../halfcoffee
 
 * content
 {:toc}
-
-<img src="/pics/logo.pg" width="200">
-
 ## 认证配置方法
 
 chap的认证过程和一般的认证不相同，要求双方配置分别为：
@@ -81,7 +78,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 >  dialer-list 1 protocol ip list 101 
 >  !
 
-![ppp_callin_hostname2.gif](http://www.cisco.com/image/gif/paws/10241/ppp_callin_hostname2.gif)
+<img src="/pics/ppp_callin_hostname2.gif" width="700">
 
 
 
@@ -122,7 +119,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 
 
 
-   
+
 
    ## 实验验证
 
