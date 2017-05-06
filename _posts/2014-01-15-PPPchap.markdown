@@ -162,9 +162,7 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
       ```
    上述debug信息中的 O CHALLENGE 代表 output 
 
-
-
-   ###（2）
+### （2）
 
    R1 ：
 
