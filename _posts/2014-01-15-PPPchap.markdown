@@ -146,20 +146,19 @@ ppp chap hostname 可以设置也可以不设置(用系统的hostname)， userna
 
    下面是debug ppp authentication 结果：
 
-     ```
+```
       R1(config)#
       *Mar  1 01:11:26.783: Se0/0 AUTH: Timeout 1
       *Mar  1 01:11:26.783: Se0/0 CHAP: O CHALLENGE id 33 len 23 from "R1"
-     ```
-    
-      ​
-    
-      ```
+```
+
+
+```
       R2(config)#
       *Mar  1 01:11:25.555: Se0/0 AUTH: Timeout 1
       *Mar  1 01:11:25.563: Se0/0 CHAP: I CHALLENGE id 33 len 23 from "R1"
       *Mar  1 01:11:25.563: Se0/0 CHAP: Ignoring Challenge with local name
-      ```
+```
    上述debug信息中的 O CHALLENGE 代表 output 
 
 ### （2）
