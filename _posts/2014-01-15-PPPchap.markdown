@@ -332,7 +332,7 @@ R2 ：
 
 ## 参考文档
 
-[PPP Authentication Using the ppp chap hostname and ppp authentication chap callin Commands]:     http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/10241-ppp-callin-hostname.html
+[PPP Authentication Using the ppp chap hostname and ppp authentication chap callin Commands](http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/10241-ppp-callin-hostname.html)
 
-[Understanding and Configuring PPP CHAP Authentication]:      http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/25647-understanding-ppp-chap.html
+[Understanding and Configuring PPP CHAP Authentication](     http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/25647-understanding-ppp-chap.html)
 
