@@ -1,0 +1,340 @@
+---
+layout: post
+title:  "PPP CHAP 认证过程详解"
+date:   2014-01-15 15:14:54
+categories: 网络
+tags: PPP CHAP 认证过程
+typora-root-url: ../../halfcoffee
+---
+
+* content
+{:toc}
+
+<img src="/pics/logo.pg" width="200">
+
+## 认证配置方法
+
+chap的认证过程和一般的认证不相同，要求双方配置分别为：
+
+ppp chap hostname 可以设置也可以不设置(用系统的hostname)， username 必需设置为对方的 ppp chap hostname（或对方hostname ） ，双方的密码（共享密钥）必需相同。通过下面的认证过程解析就能分析出为什么可以这样设置。
+
+## Cisco 的举例
+
+> **Router 2**
+>
+>  hostname r1 
+>  ! 
+>  username r2 password 0 cisco 
+>
+> ! -- Hostname of other router and shared secret
+>
+>  ! 
+>  interface BRI0/0 
+>   ip address 20.1.1.1 255.255.255.0 
+>   no ip directed-broadcast 
+>   encapsulation ppp 
+>   dialer map ip 20.1.1.2 name r2 broadcast 5772222 
+>   dialer-group 1 
+>   isdn switch-type basic-5ess 
+>   ppp authentication chap callin 
+>
+> ! -- Authentication on incoming calls only
+> ！收到Challenge包可视为需要Authentication
+>
+>
+>   ppp chap hostname alias-r1 
+>
+> ! -- Alternate CHAP hostname
+>
+>  ! 
+>  access-list 101 permit ip any any 
+>  dialer-list 1 protocol ip list 101 
+>  !
+
+
+
+> **Router 2**
+>
+>  hostname r2
+>  ! 
+>  username alias-r1 password 0 cisco 
+>
+> ! -- Alternate CHAP hostname and shared secret.
+>  ! -- The username must match the one in the ppp chap hostname 
+>  ! -- command on the remote router.
+>
+>  !
+>  interface BRI0/0 
+>   ip address 20.1.1.2 255.255.255.0 
+>   no ip directed-broadcast
+>   encapsulation ppp 
+>   dialer map ip 20.1.1.1 name 
+>   alias-r1 broadcast 5771111
+>
+> ! -- Dialer map name matches alternate hostname "alias-r1".
+>
+>   dialer-group 1 
+>   isdn switch-type basic-5ess 
+>   ppp authentication chap
+>  ! 
+>  access-list 101 permit ip any any 
+>  dialer-list 1 protocol ip list 101 
+>  !
+
+![ppp_callin_hostname2.gif](http://www.cisco.com/image/gif/paws/10241/ppp_callin_hostname2.gif)
+
+
+
+1. 此例中，R1 配置 **ppp authentication chap callin**
+
+2. R2 收到call后，会challenges R1 ，默认会发送一个challenge包，里面有
+
+   - 01 = challenge packet type identifier.
+
+
+- ID = 标识Challenge包的序列号
+   - random =一个随机数
+   - r2 =challenger 的认证用户名（也就是hostname），是用来标示自己的
+
+3. Router 1收到 Router 2's challenge ，在自己用户名中找 username "r2"
+
+4. Router 1 找到 "r2" 对应的密码 cisco ， Router 1 用此**密码**+ 收到的 challenge 包 中的** ID **和 **随机数**，通过MD5算出一个**值**
+
+5. Router 1 发送上面生成的值， 并用自己的hostname 标识，即"alias-r1," 
+
+6. Router 2 收到标识为 "alias-r1" 的包，在本地 username中查找 "alias-r1“ 对应的密码
+
+7. Router 2 发现 " alias-r1"  对应密码也是 "cisco." 将此密码，还有之前发给R1 的那个challenge包中的 **ID， 随机数**，进行MD5,得到一个**值**
+
+8. Router 2 将此值和 Router 1 发来的值做对比，相同则通过认证。因为两边密码都一样，而challenge包中的 ID 和随机数也一样，所以两边生成的值也一样。
+
+   ---
+
+   根据上面所说，可以发现：
+
+   1,  Challenge 包里的 name 优先采用ppp chap hostname ，其次 Router的Hostname
+
+   2,  Response 包里 name 优先采用ppp chap hostname ，其次 Router的Hostname；
+
+   密码优先使用challenge包中name 对应的本地 username 的密码（如果该用户没设密码，那就用空密码！），其次才会考虑用 ppp chap password xx 。
+
+   下面实验只是单向认证，但是完全理解后，双向认证也不难，只需双方要求认证，hostname是对方的hostname，两边密码相同，如文章开头所说。我觉得配置会出错的，就是上面的两句话。
+
+
+
+   
+
+   ## 实验验证
+
+   ### **（1）**
+
+   R1：
+
+​	username R1 password cisco 
+
+​	ppp authentication chap
+
+   R2：
+
+​	ppp chap hostname R1 
+
+​	ppp chap password cisco 
+
+   这样的设置组合不可行，
+
+   R2发送call
+
+   R1回复challenge，标识R1  
+
+   R2收到后，发现标识是自己设置的chap hostname，直接丢弃
+
+   下面是debug ppp authentication 结果：
+
+     ```
+      R1(config)#
+      *Mar  1 01:11:26.783: Se0/0 AUTH: Timeout 1
+      *Mar  1 01:11:26.783: Se0/0 CHAP: O CHALLENGE id 33 len 23 from "R1"
+     ```
+    
+      ​
+    
+      ```
+      R2(config)#
+      *Mar  1 01:11:25.555: Se0/0 AUTH: Timeout 1
+      *Mar  1 01:11:25.563: Se0/0 CHAP: I CHALLENGE id 33 len 23 from "R1"
+      *Mar  1 01:11:25.563: Se0/0 CHAP: Ignoring Challenge with local name
+      ```
+   上述debug信息中的 O CHALLENGE 代表 output 
+
+   ### **（2）**
+
+   R1 ：
+
+​	username R1 password cisco
+
+​	ppp authentication chap
+
+   R2：
+
+​	ppp chap password cisco 
+
+   这种设置不会出现（1）中R2收到Challenge后丢弃的情况，也会认证失败
+
+   R2 发送call，R1回复challenge ，标识R1；  
+
+   R2 使用系统hostname，密码用设的chap 默认密码，发送response 给R1
+
+   R1 收到R2的Response，在本地数据库找到R2对应的密码为cisco ,没找到，验证失败
+
+   ```
+      R1(config-if)#
+
+      *Mar  1 01:14:36.991: Se0/0 PPP: Authorization required
+
+      *Mar  1 01:14:36.995: Se0/0 CHAP: O CHALLENGE id 77 len 23 from "R1"
+
+      *Mar  1 01:14:36.999: Se0/0 CHAP: I RESPONSE id 77 len 23 from "R2"
+
+      *Mar  1 01:14:36.999: Se0/0 PPP: Sent CHAP LOGIN Request
+
+      *Mar  1 01:14:36.999: Se0/0 PPP: Received LOGIN Response FAIL
+
+      *Mar  1 01:14:36.999: Se0/0 CHAP: O FAILURE id 77 len 25 msg is "Authentication failed"
+   ```
+
+   ​
+
+   ```
+     R2(config-if)#
+
+      *Mar  1 01:14:35.771: Se0/0 PPP: Authorization required
+
+      *Mar  1 01:14:35.775: Se0/0 PPP: No authorization without authentication
+
+      *Mar  1 01:14:35.775: Se0/0 CHAP: I CHALLENGE id 77 len 23 from "R1"
+
+      *Mar  1 01:14:35.775: Se0/0 CHAP: Using hostname from unknown source
+
+      *Mar  1 01:14:35.775: Se0/0 CHAP: Using password from AAA
+
+      *Mar  1 01:14:35.775: Se0/0 CHAP: O RESPONSE id 77 len 23 from "R2"
+
+      *Mar  1 01:14:35.779: Se0/0 CHAP: I FAILURE id 77 len 25 msg is "Authentication failed"
+   ```
+
+   ​
+
+   ### **（3）**
+
+   R1: username R2 password cisco 
+
+   ​	ppp authentication chap
+
+   R2:  ppp chap password cisco
+
+   这样的组合可行
+
+   R2 发送call，R1回复challenge ，标识R1；  
+
+   R2 使用系统hostname，密码用设的chap 默认密码，发送response 给R1
+
+   R1 收到R2的Response，在本地数据库找到R2对应的密码为cisco ,验证通过
+
+   ```
+   R1(config)#
+
+   *Mar  1 01:03:08.799: Se0/0 AUTH: Timeout 1
+
+   *Mar  1 01:03:08.799: Se0/0 CHAP: O CHALLENGE id 20 len 23 from "R1"
+
+   *Mar  1 01:03:08.803: Se0/0 CHAP: I RESPONSE id 20 len 23 from "R2"
+
+   *Mar  1 01:03:08.811: Se0/0 PPP: Sent CHAP LOGIN Request
+
+   *Mar  1 01:03:08.811: Se0/0 PPP: Received LOGIN Response PASS
+
+   *Mar  1 01:03:08.811: Se0/0 PPP: Sent LCP AUTHOR Request
+
+   *Mar  1 01:03:08.811: Se0/0 PPP: Sent IPCP AUTHOR Request
+
+   *Mar  1 01:03:08.819: Se0/0 LCP: Received AAA AUTHOR Response PASS
+
+   *Mar  1 01:03:08.819: Se0/0 IPCP: Received AAA AUTHOR Response PASS
+
+   *Mar  1 01:03:08.819: Se0/0 CHAP: O SUCCESS id 20 len 4
+
+   *Mar  1 01:03:08.823: Se0/0 PPP: Sent CDPCP AUTHOR Request
+
+   R1(config)#
+
+   *Mar  1 01:03:08.823: Se0/0 CDPCP: Received AAA AUTHOR Response PASS
+
+   *Mar  1 01:03:08.863: Se0/0 PPP: Sent IPCP AUTHOR Request
+
+
+   ```
+
+   ```
+   R2#
+   Mar  1 01:03:07.571: Se0/0 AUTH: Timeout 1
+   Mar  1 01:03:07.575: Se0/0 CHAP: ** I CHALLENGE id 20 len 23 from "R1" **
+   Mar  1 01:03:07.575: Se0/0 CHAP: Using hostname from unknown source
+   Mar  1 01:03:07.579: Se0/0 CHAP: Using password from AAA
+   Mar  1 01:03:07.579: Se0/0 CHAP: O RESPONSE id 20 len 23 from "R2"
+   Mar  1 01:03:07.599: Se0/0 CHAP: I SUCCESS id 20 len 4
+   ```
+
+### **（4）**
+
+R1 ：
+
+​	username R2 password cisco 
+
+​	ppp authentication chap
+
+R2：
+
+​	username R1 password cisco 
+
+​	ppp chap password admin
+
+实验测试可认证成功
+
+**（5）**
+
+R1：
+
+​	 username R2 
+
+​	ppp authentication chap
+
+R2 ：
+
+​	 username R1
+
+​	ppp chap password admin
+
+实验测试可认证成功
+
+### **（6）**
+
+R1： username R2 password cisco 
+
+​	ppp authentication chap
+
+R2 ：
+
+​	 username R1 password admin
+
+​	ppp chap password cisco
+
+实验测试**不能**认证成功
+
+
+
+## 参考文档
+
+[PPP Authentication Using the ppp chap hostname and ppp authentication chap callin Commands]:     http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/10241-ppp-callin-hostname.html
+
+[Understanding and Configuring PPP CHAP Authentication]:      http://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/25647-understanding-ppp-chap.html
+
