@@ -2,7 +2,7 @@
 layout: post
 title:  "电影收藏"
 date:   2016-01-01 15:14:54
-categories: movies
+categories: Movies
 tags: 电影
 typora-root-url: ../../halfcoffee
 ---

@@ -15,7 +15,7 @@ typora-root-url: ../../halfcoffee
 
 ## Edge HA + OSPF
 
-![nsx-conv1](/pics/nsx-conv1.png)
+![nsx-conv1](/pics/nsx-conv1.jpg)
 
 
 
@@ -35,7 +35,7 @@ typora-root-url: ../../halfcoffee
 
 ## 多Edge做ECMP
 
-![nsx-conv1](/pics/nsx-conv2.png)
+![nsx-conv1](/pics/nsx-conv2.jpg)
 
 
 
