@@ -43,6 +43,12 @@ BFD全称Bidirectional Forwarding Detection，双向转发检测，可以实现�
 
 <img src="/pics/bfd5.jpg" width="800">
 
+
+
+可以在解决方案2的基础上优化，在路由器和路由器之间添加链路，然后运行OSPF动态协议，这样可以简化配置
+
+<img src="/pics/bfd5.1.jpg" width="800">
+
 ## 0、VRRP 联动 BFD 实现切换
 
 本端主路由器：
@@ -162,7 +168,7 @@ ip route-static 0.0.0.0 0.0.0.0 193.1.1.2 preference  200
 
 ```
 bfd
-``` 
+```
 
 //全局开启bfd功能
 
@@ -189,6 +195,8 @@ ip route-static 0.0.0.0 0.0.0.0 193.1.1.2 preference  200
 ```
 
 //配置浮动静态路由，在主路由失效后生效
+
+
 
 
 ## 参考文章
