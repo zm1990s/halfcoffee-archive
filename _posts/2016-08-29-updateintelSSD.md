@@ -16,13 +16,13 @@ typora-root-url: ../../halfcoffee
 
 VSAN 兼容列表内，Intel 的P3600和P3700有两款固件：8DV10171 和 8DV10131，两个推荐的驱动不一样，具体信息如下：
 
-总结来说，固件为**8DV10171**的推荐VMware自己的**nvme-1.2.0.27-4vmw **驱动，我在网上找到最新版本为：
+总结来说，固件为**8DV10171**的推荐VMware自己的 **nvme-1.2.0.27-4vmw** 驱动，我在网上找到最新版本为：
 
-<span style="line-height: 28px; color: rgb(0, 0, 255);">**nvme-1.2.0.27-4vmw.550.0.0.1331820.x86_64.vib**
+<span style="line-height: 28px; color: rgb(0, 0, 255);">nvme-1.2.0.27-4vmw.550.0.0.1331820.x86_64.vib
 
 以及intel自己的intel-nvme-1.0e.2.0 驱动，我找到最新版本为：
 
-<span style="line-height: 28px; color: rgb(0, 0, 255);"> **intel-nvme-1.0e.2.0-1OEM.550.0.0.1391871.x86_64.vib**
+<span style="line-height: 28px; color: rgb(0, 0, 255);"> intel-nvme-1.0e.2.0-1OEM.550.0.0.1391871.x86_64.vib
 
 ****
 
