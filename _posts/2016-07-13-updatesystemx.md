@@ -1,11 +1,12 @@
 ---
 layout: post
-title:  "Lenovo system X3850 X6 固件(M5210 RAID卡)升级及开启JBOD（直通）模式 "
+title:  "Lenovo X3850 X6 固件(M5210 RAID卡)升级及开启JBOD（直通）模式"
 date:   2016-07-13
 categories: VSAN
-tags:vsphere vmware esxcli X3850 systemX IBM Lenovo
+tags: vsphere vmware esxcli X3850 systemX IBM Lenovo
 typora-root-url: ../../halfcoffee
 ---
+
 * content
 {:toc}
 > 写在前面：因为需要做VMware VSAN，要求服务器RAID卡最好支持直通模式。X3850 X6带的RAID卡是M5210，硬件说z第一次做IBM服务器的升级，升级原因是M5210 RAID卡虽然支持JBOD模式(硬盘pass-through)，但是开启对应选项时报错，国外有人用X3650服务器，M5210的RAID卡遇到了同样错误，最终通过升级RAID卡固件，并移除RAID卡缓存后实现了JBOD(厂家也告知要移除缓存才支持JBOD，但是我移除后RAID卡会进入safe-mode模式)。

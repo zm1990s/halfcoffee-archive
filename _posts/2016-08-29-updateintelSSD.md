@@ -3,9 +3,10 @@ layout: post
 title:  "ESXi 下 intel SSD 固件及驱动升级"
 date:   2016-08-29
 categories: VSAN
-tags:vsphere vmware esxcli intel SSD p3700
+tags: vsphere vmware esxcli intel SSD p3700
 typora-root-url: ../../halfcoffee
 ---
+
 * content
 {:toc}
 
