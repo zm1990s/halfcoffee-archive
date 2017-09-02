@@ -43,6 +43,12 @@ VMware HOL 文档链接：
 
 
 
+VMware Solution Exchange
+
+[https://marketplace.vmware.com/vsx](https://marketplace.vmware.com/vsx)
+
+
+
 VCSA 6.5 HA 安装配置
 
 [https://esxsi.com/2016/11/22/vcsa65-ha/](https://esxsi.com/2016/11/22/vcsa65-ha/)
@@ -52,3 +58,35 @@ VCSA 6.5 HA 安装配置
 vSphere replication 6.x安装配置手册
 
 http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/
+
+
+
+## 精选博客
+
+virtuallyGhetto
+
+vRealize Automation、VSAN 专题比较多
+
+[http://www.virtuallyghetto.com/](http://www.virtuallyghetto.com/)
+
+
+
+vTricks
+
+[http://vtricks.com/tag/vsan/](http://vtricks.com/tag/vsan/)
+
+
+
+Yellow Bricks 
+
+VMware CTO，博客主要内容为VMware相关技术文档，有部分新产品技术介绍。
+
+[http://www.yellow-bricks.com/](http://www.yellow-bricks.com/)
+
+
+
+Cormac Hogan 
+
+VMware存储与高可用部门员工，博客内容以vSAN、vVOL为主
+
+[https://cormachogan.com](https://cormachogan.com)
