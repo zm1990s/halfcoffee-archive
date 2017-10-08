@@ -43,7 +43,7 @@ typora-root-url: ../../halfcoffee
 
 使用这种拓扑时，如果使用静态路由协议，则外部物理交换机的配置会比较复杂，需要配置IP SLA来检查Edge的健康状态，如果发现Edge故障后修改本地的静态路由。当外部交换机有多个时，配置量又会翻倍。
 
-如果使用OSPF，如果按照默认OSPF配置，Dead时间未40s，一旦某个Edge出现故障，则部分虚拟机网络可能中断40s，**为了尽可能快地让外部交换机检测到Edge故障，需要将Edge和DLR之间Hello Dead时间改为1，4秒。ESG 与 DLR CVM的 Hello Dead 时间也需要修改为1，4。**
+如果使用OSPF，如果按照默认OSPF配置，Dead时间未40s，一旦某个Edge出现故障，则部分虚拟机网络可能中断40s，**为了尽可能快地让外部交换机检测到Edge故障，需要将Edge和DLR之间Hello Dead时间改为1，3秒。ESG 与 DLR CVM的 Hello Dead 时间也需要修改为1，3。**
 
 理想状态下，Edge的故障引起的丢包只是5s左右，但如果同时有其他控制层的组件故障，会有些未知的风险。
 
