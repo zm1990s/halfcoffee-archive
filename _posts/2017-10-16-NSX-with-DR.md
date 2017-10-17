@@ -179,7 +179,7 @@ SRM依然可以沿用其最佳实践，在使用NSX后，SRM不在需要PortGrou
 - 作为 SRM 恢复的一部分，虚拟机会自动关联到合适的端口组，主中心的故障不会影响以上操作。
 - 在备份站点的 Universal Logical Switch、Universal DLR 和 DLR CVM 不受影响，即使此时 NSX Primary Manager 和 UCC 已经不可访问。
 
-<img src="/pics/NSX-DR9.png" width="800">
+
 
 NSX 组件恢复步骤（详情参见参考资料）：
 
