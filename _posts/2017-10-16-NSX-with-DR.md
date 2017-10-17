@@ -114,12 +114,6 @@ SRM依然可以沿用其最佳实践，在使用NSX后，SRM不在需要PortGrou
 
 <img src="/pics/NSX-DR2.png" width="800">
 
-**3、综合 1 和 2 的设计，两个 UDLR，开启 Local Egress 。**
-
-Egress：使用 Locale-ID 控制从主数据中心出去。
-
-Ingress ：调整 ESG （使用 BGP 时还需要调整物理路由器 Weight）的 Cost，让所有流量优先从主数据中心进入。
-
 ## 计划迁移/部分应用恢复
 
 >  大部分企业要求 DR 设计能够满足部分应用恢复或者计划迁移的要求。在这时候，做完恢复后要求恢复的虚拟机不仅能够正常运行，他们还需要与运行在主数据中心的部分虚拟机进行正常通讯。
@@ -130,8 +124,161 @@ Ingress ：调整 ESG （使用 BGP 时还需要调整物理路由器 Weight）�
 
 <img src="/pics/NSX-DR3.png" width="800">
 
-- 对于 NSX 而言，不需要做任何变更，虚拟机可以随意在两个数据中心进行迁移
-- ​
+- 对于 NSX 而言，逻辑网络在两个数据中心是相同的，不需要做任何变更，虚拟机可以随意在两个数据中心进行迁移
+- Ingress/Egress 流量：所有南北向流量依然通过主站点进出。
+
+<img src="/pics/NSX-DR4.png" width="800">
+
+## 完整应用恢复
+
+> 完整应用恢复指将一整套应用（WEB、APP、DB）完整在备份站点恢复。这时候推荐使用 Locale-ID 进行流量路径优化。
+
+下面是完整应用恢复的步骤：
+
+- 执行 SRM 的恢复计划，恢复 WEB、APP 和 DB VM
+- 对于 NSX ，只需要调整 Ingress/Egress 流量。
+
+### 使用 Locale-ID 进行南北向流量调整
+
+- Egress：调整备份站点主机或集群的 UUID，将其改为 Secondary NSX Manager 的 UUID，此操作可以通过 API 或者 UI 执行。
+- Ingress：撤销备份站点之前配置的 Prefix List，让外部物理路由器可以通过动态路由学习到去往逻辑网络的路由。同时在主数据中心的 UDLR 设置 Prefix list（通过 UI 或者 API）。
+
+<img src="/pics/NSX-DR5.png" width="800">
+
+### 使用动态路由调整南北向流量路径
+
+> 这种配置模式是全局的，一旦调整会影响所有网段，而使用 Locale-ID 时可以针对每个网段进行流量路径调整（egress使用Locale-ID做本地出，ingress使用Prefix-list 进行网段的对外发布）。
+>
+> 这种设计可以在外部路由器出问题时自动进行切换。
+
+- Egress：如果Uplink故障，动态路由能自动检测故障，触发路由更新。所有流量切换到备数据中心
+- Ingress：Ingress流量也会切到备份数据中心，因为主数据中心的外部路由器不能通过主数据中心的ESG来学习到去往逻辑网络的路由。
+
+<img src="/pics/NSX-DR6.png" width="800">
+
+在下方的故障中，WEB、APP、DB都进行了恢复，网络也自动进行了恢复。
+
+*注意只有网络出问题时，灾难恢复可以不进行业务的恢复。*
+
+<img src="/pics/NSX-DR7.png" width="800">
+
+### 如何选择南北向流量优化方式
+
+参照下图，每种方式都有其优缺点，我们推荐尽量使用动态路由来实现failover，因为其简单并可以自动执行，无需用户干预。Locale-ID 推荐在需要实现更细颗粒度灾备时使用（且主备数据中心网络功能均正常），Locale-ID（+Prefix List）需要手动介入或者使用脚本来修改NSX某些配置。
+
+<img src="/pics/NSX-DR8.png" width="800">
+
+## 整个数据中心恢复
+
+整个数据中心故障牵扯到使用 Recovery Plan 恢复所有应用及 NSX 组件。
+
+具体步骤有：
+
+- 运行 SRM 进行 Recovery Plan
+- 假设 NSX Primary manager 和 Universal Controller Cluster 不可访问。
+- 作为 SRM 恢复的一部分，虚拟机会自动关联到合适的端口组，主中心的故障不会影响以上操作。
+- 在备份站点的 Universal Logical Switch、Universal DLR 和 DLR CVM 不受影响，即使此时 NSX Primary Manager 和 UCC 已经不可访问。
+
+<img src="/pics/NSX-DR9.png" width="800">
+
+NSX 组件恢复步骤（详情参见参考资料）：
+
+1、在备份站点，将 Secondary NSX manager 从 Primary NSX Manager 断开（状态会变为 Transit）
+
+2、将 Secondary NSX Manager 设置为 Primary 角色
+
+3、在备份站点使用新的 Primary NSX manager 重新部署 NSX Controller 集群（使用新的 IP Pool）
+
+4、同步 Controller 状态（update Controller State）
+
+5、如果使用了 Local Egress 功能，Universal Control VM 已经存在，否则需要重新部署 Universal Control VM
+
+如果原来的主站点恢复了：
+
+6、如果原来的数据中心恢复了，在原来主站点的 NSX manager 上“Remove Secondary NSX Manager”
+
+7、将主站点的 NSX manager 降级为 Transit Role（Remove Primary Role）
+
+8、删除主站点原来的 UCC
+
+9、取决于部署模式，如果需要，删除主站点的 Control VM（因为已经在备份站点部署了新的 Control VM）。
+
+10、将主站点的 Transit role NSX manager 注册为备份站点的 Secondary NSX manager。
+
+到此，VC 组件恢复完整可以正常工作。两个 NSX manager，分别为 Primary 和 Secondary，UCC状态也正常。
+
+## Failback
+
+从 SRM 角度进行 Failback，只需要增加两步骤：
+
+- SRM Failback：SRM 正常运行业务虚拟机的恢复计划，NSX 逻辑网络可以无缝正常运行（只是流量会从备份站点出去）。
+- SRM re-protect：类似于重新设置 Protect Plan；只是 NSX Primary Manager 和 UCC 运行在备份站点。
+
+NSX Failback：
+
+1、通过新的 Primary NSX manager 删除备份站点的 UCC
+
+2、将当前 Secondary NSX manager（主站点的NSX manager） 从 Primary NSX manager 移除
+
+3、将主站点的 NSX manager 从 Transit 指定为 Primary
+
+4、移除备份站点的 NSX manager  Primary role，其将会进入 Transit Role
+
+5、将备份站点的 NSX manager 设定为 Secondary NSX manager 
+
+6、在主站点重新部署 Universal Controller Cluster
+
+7、更新 Controller State
+
+8、根据部署模型的不同，决定是否要重新部署 UDLR Control VM
+
+**（更加详细内容请见 Multi-site Options and Cross-VC NSX Design Guide ） **
+
+<img src="/pics/NSX-DR12.jpg" width="1000">
+
+<img src="/pics/NSX-DR13.jpg" width="1000">
+
+<img src="/pics/NSX-DR14.jpg" width="1000">
+
+<img src="/pics/NSX-DR15.jpg" width="1000">
+
+
+
+## 使用 GSLB 全局负载均衡调整 Ingress 流量
+
+虽然使用 NSX 已经能够完整实现灾备，但是在某些时候也推荐使用全局负载均衡来做 Local Ingress 优化。本文不做过细的介绍，关于 GSLB 的最佳实践请参考厂商的文档。
+
+VMware Blog 有一篇较为详细的和 F5 结合做 A/A 架构的文章：[点击打开](https://blogs.vmware.com/networkvirtualization/2017/10/demo-multi-site-active-active-nsx-f5-networks-gslb-palo-alto-networks-security.html/)
+
+下面简单描述下引入 GSLB 后如何设计DR：
+
+- 使用 GSLB 时，可以结合 DNS 与站点/应用健康检测。
+- 所有面向互联网的 VM 都通过 VIP 访问，这个 VIP 由 SLB 提供。
+- WEB VM 的网关依然指向 NSX DLR，出往数据中心依然通过 ESG；数据包从 WEB VM 出来后先到 ESG 做 VXLAN 到 VLAN 解封装，然后通过 Transit VLAN发送给 SLB，SLB 再通过路由将此包发送给 ESG 送往数据中心外部。
+- 在主备数据中心部署负载均衡（Active/Standby），为面向互联网的业务提供服务，运行SNAT。
+- SLB 平行于 ESG 部署，连接到同一个 Transit VLAN 上。
+- WEB VM 对外的 VIP 在两个站点都被宣告，但是 GSLB 配置为 A/S 结构，保证 DNS 查询结构返回地址 20.1.1.1，即主站点的 VIP。
+- Failover 时，DNS 查询结果是 30.1.1.1，即备份站点的 VIP。具体何时发生 Failover 取决于 GSLB 的健康检查算法
+- 使用 GSLB 时，不需要调整 Prefix List 或者 断开 UDLR CVM 接口等操作。GLSB 来控制数据包 Ingress 流向。
+- 除了面向互联网的业务流量外，其他流量都通过 NSX ESG传输，不经过 SLB。
+
+<img src="/pics/NSX-DR10.png" width="800">
+
+## 其他需要考虑的
+
+- 为了支持 Cross-VC，物理网络的 MTU 要修改为>=1600。
+- 站点之间的 RTT 最大为 150ms。
+- Universal Logical Switch 不能做二层桥接。
+- Universal DFW 只支持使用 IP Set、MAC Set、Security Groups（包含 IP Set和 MAC Set）来做防火墙策略。
+- Universal 对象不支持第三方服务 insertion。
+- Universal Logical Entities 不支持 Endpoint 安全。
+- 通过路由宣告或者 GSLB 来控制 Ingress 流量相互不冲突。很多设计中两者可以共存。共用时，部分流量使用 GSLB 来保护业务网络连续性，剩余的使用路由宣告保护。
+- 使用 Locale-ID 最小的颗粒度为每主机。因此在多个应用运行在同一台主机的情况下，这多个应用需要共享一个 Locale。
+- 下例中，Application 1 和 Application 2在同一个物理站点，但是使用不同的 Locale-ID，因此他们不允许运行在同一台主机（或集群，如果Locale-ID基于Cluster设置）。同理 Application 3 和 4 也不能在同一台主机。
+
+<img src="/pics/NSX-DR11.png" width="800">
+
+
 
 # 参考资料
 
