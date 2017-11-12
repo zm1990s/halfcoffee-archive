@@ -17,7 +17,7 @@ typora-root-url: ../../halfcoffee
 - 在两个数据中心使用一致的安全策略
 - 在创建安全策略时依赖于IP地址
 - 如果进行IP remaping，则依赖的策略都需要进行修改
-- 如果不适用 IP re-mapping，则要保证两个数据中心二层网络打通，需要OTV、VPLS等技术。这样会扩大二层广播域。
+- 如果不使用 IP re-mapping，则要保证两个数据中心二层网络打通，需要OTV、VPLS等技术。这样会扩大二层广播域。
 
 # DR 场景
 
