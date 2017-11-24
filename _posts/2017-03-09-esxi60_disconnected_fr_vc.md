@@ -45,6 +45,7 @@ tags: vsphere vmware 6.0 VSAN esxcli 排错 troubleshooting
    vi root
 
 5. 找到下列行，在前面加 # ，保存文件并退出
+
    00 1 * * * localcli storage core device purge:
    
    \#00 1 * * * localcli storage core device purge
