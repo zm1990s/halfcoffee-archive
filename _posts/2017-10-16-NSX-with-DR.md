@@ -76,7 +76,7 @@ SRM依然可以沿用其最佳实践，在使用NSX后，SRM不在需要PortGrou
 在开始搭建 DR 环境时，需要预先搭建好 NSX 环境，具体步骤如下：
 
 - 两个独立的站点，之间通过三层网络连接起来
-- 每个站点部署下列东西：一套或多套vCenter；ESXi 主机，请注意版本号；SRM，SRM需要安装最佳实践搭建
+- 每个站点部署下列东西：一套或多套vCenter；ESXi 主机，请注意版本号；SRM，SRM需要按照最佳实践搭建
 - 主数据中心搭建 Primary NSX Manager，和主数据中心的 vCenter 做对接。
 - 其他数据中心搭建 Secondary NSX Manager
 - 在主机数据中心部署三台 Universal Controller

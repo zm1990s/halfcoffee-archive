@@ -27,9 +27,27 @@ tags: vsphere vmware 6.0 VSAN esxcli 排错 troubleshooting
 
 通过关键词 /etc/vmware/lunTimestamps.log.LOCK 搜索到了前面提到的两个 KB ，我的情况属于 localcli 锁住了 /etc/vmware/lunTimestamps.log 文件，KB 中提到如果主机已经未响应，则需要重启后再禁用crontab定时任务，在我目前的环境下重启会影响业务，所以最好能通过其他方式解决。
 
-后尝试了下**删除 /etc/vmware/lunTimestamps.log.LOCK 文件 (或使用mv命令重命名)**，之后esxi立刻连接到主机，单独登陆ESXi也可以正常登陆，登陆后发现有VM DRS，集群和主机也无单独报警，虚拟机运行正常。问题解决
+后尝试了下**删除 /etc/vmware/lunTimestamps.log.LOCK 文件 (或使用mv命令重命名)**，之后esxi立刻连接到主机，单独登陆ESXi也可以正常登陆，登陆后发现有VM DRS，集群和主机也无单独报警，虚拟机运行正常。问题解决。
 
+为了永久不让这个问题发生，可以参考[KB2146548](https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2146548) 来禁用 Localcli 的定时任务，具体操作如下：
 
+1. cd /var/spool/cron/crontabs/ 
+
+2. 备份root文件
+   cp root ./root.bak
+
+3. 赋予root文件写权限
+
+   chmod 666 root
+
+4. 使用vi编辑器打开
+
+   vi root
+
+5. 找到下列行，在前面加 # ，保存文件并退出
+   00 1 * * * localcli storage core device purge:
+   
+   \#00 1 * * * localcli storage core device purge
 
 
 
