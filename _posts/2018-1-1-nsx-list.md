@@ -37,6 +37,14 @@ typora-root-url: ../../halfcoffee
 
 [https://communities.vmware.com/docs/DOC-31982](https://communities.vmware.com/docs/DOC-31982)
 
+### VMware Valid Design
+
+[https://www.vmware.com/pdf/vmware-validated-design-20-reference-architecture-guide.pdf](https://www.vmware.com/pdf/vmware-validated-design-20-reference-architecture-guide.pdf)
+
+### NSX 同趋势(亚信安全)DS 9.6 部署指南
+
+[http://docs.trendmicro.com/all/ent/ds/v9.6/en-us/Deep_Security_96_Install_Guide_nsx_EN.pdf](http://docs.trendmicro.com/all/ent/ds/v9.6/en-us/Deep_Security_96_Install_Guide_nsx_EN.pdf)
+
 ### NSX 同 Arista 设备集成设计指南
 
 [https://www.arista.com/assets/data/pdf/White_Paper_Design_VMware_Arista.pdf](https://www.arista.com/assets/data/pdf/White_Paper_Design_VMware_Arista.pdf)
