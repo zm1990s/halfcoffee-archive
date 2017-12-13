@@ -17,7 +17,7 @@ typora-root-url: ../../halfcoffee
 
 
 
-# 设计与实施指南
+## 设计与实施指南
 
 ### NSX Design Guide v3.0，此文档为NSX设计基础，第一必读的文档
 
@@ -79,7 +79,7 @@ https://f5.com/Portals/1/Premium/Architectures/RA-VMware-NSX-Best-Practices.pdf
 
 [https://communities.vmware.com/docs/DOC-35793](https://communities.vmware.com/docs/DOC-35793)
 
-# 双数据中心
+## 双数据中心
 
 ### NSX Cross-VC vRO工具集(Blog)
 
@@ -105,7 +105,7 @@ NSX Cross-VC环境支持Local-Egress功能，但是为了流量路径最优，�
 
 
 
-# DFW
+## DFW
 
 ### 分布式防火墙配置指南
 
