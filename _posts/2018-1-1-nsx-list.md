@@ -31,7 +31,7 @@ typora-root-url: ../../halfcoffee
 
 ### NSX MH 版本设计指南
 
-[https://communities.vmware.com/servlet/JiveServlet/previewBody/27611-102-2-37003/NSX-MH-DesignGuidev4.2_Final.pdf](https://communities.vmware.com/servlet/JiveServlet/previewBody/27611-102-2-37003/NSX-MH-DesignGuidev4.2_Final.pdf)
+[https://communities.vmware.com/docs/DOC-27611](https://communities.vmware.com/docs/DOC-27611)
 
 ### NSX  EUC 环境设计指南
 
@@ -59,7 +59,7 @@ https://f5.com/Portals/1/Premium/Architectures/RA-VMware-NSX-Best-Practices.pdf
 
 ### NSX 非全新环境部署指南
 
-[https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/whitepaper/products/nsx/vmware-nsx-brownfield-design-and-deployment-guide-white-paper.pdf](https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/whitepaper/products/nsx/vmware-nsx-brownfield-design-and-deployment-guide-white-paper.pdf)
+[https://communities.vmware.com/docs/DOC-29556](https://communities.vmware.com/docs/DOC-29556)
 
 ### 在 UCS 和 Nexus 9000上部署NSX
 
