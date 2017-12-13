@@ -27,7 +27,19 @@ type: page
 
 为方便墙内用户，已上传到博客： [下载链接](http://www.halfcoffee.com/tools/yVM.ova)
 
+
+
+### NSX Cross-VC Extensibility kit
+
+里面有很多vRO脚本，用于Cross-VC环境，使用这些vRO脚本可以和SRM联动，实现业务和网络一起进行灾备切换。
+
+[链接](http://www.routetocloud.com/2016/09/nsx-cross-vc-extensibility-kit/)
+
 ## 网址
+
+VMware 产品中文安装部署手册
+
+[链接](https://docs.vmware.com/cn/)
 
 VMware产品间兼容列表查询：
 
@@ -71,9 +83,13 @@ vRealize Automation、VSAN 专题比较多
 
 
 
+
+
 vTricks
 
 [http://vtricks.com/tag/vsan/](http://vtricks.com/tag/vsan/)
+
+
 
 
 
@@ -82,6 +98,8 @@ Yellow Bricks
 VMware CTO，博客主要内容为VMware相关技术文档，有部分新产品技术介绍。
 
 [http://www.yellow-bricks.com/](http://www.yellow-bricks.com/)
+
+
 
 
 
