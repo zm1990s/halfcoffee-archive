@@ -17,7 +17,7 @@ type: page
 * [NSX 功能演示](http://www.halfcoffee.com/demo/NSX.htm) 
 
 * [NSX 6.2 安装](http://www.halfcoffee.com/demo/nsxinstall-zh.htm) 
-* 
+
 * [NSX for vRops 插件介绍](http://www.halfcoffee.com/demo/NSX-Mgmt-vRealize.htm) 
 
 
