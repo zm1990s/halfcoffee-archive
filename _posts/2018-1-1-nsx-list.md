@@ -37,6 +37,10 @@ typora-root-url: ../../halfcoffee
 
 [https://communities.vmware.com/docs/DOC-31982](https://communities.vmware.com/docs/DOC-31982)
 
+### NSX  Airwatch 设计指南
+
+[https://communities.vmware.com/docs/DOC-34159](https://communities.vmware.com/docs/DOC-34159)
+
 ### VMware Valid Design
 
 [https://www.vmware.com/pdf/vmware-validated-design-20-reference-architecture-guide.pdf](https://www.vmware.com/pdf/vmware-validated-design-20-reference-architecture-guide.pdf)
