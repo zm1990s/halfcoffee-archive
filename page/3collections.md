@@ -37,37 +37,37 @@ type: page
 
 ## 网址
 
-VMware 产品中文安装部署手册
+* VMware 产品中文安装部署手册
 
 [https://docs.vmware.com/cn/](https://docs.vmware.com/cn/)
 
-VMware产品间兼容列表查询：
+* VMware产品间兼容列表查询：
 
 [链接](http://www.vmware.com/resources/compatibility/sim/interop_matrix.php#interop&2=&93=)
 
-VMware VSAN 硬件兼容性列表：
+* VMware VSAN 硬件兼容性列表：
 
 [链接](http://www.vmware.com/resources/compatibility/search.php?deviceCategory=vsan)
 
-VMware HOL 文档链接：
+* VMware HOL 文档链接：
 
 [http://docs.hol.vmware.com/](http://docs.hol.vmware.com/)
 
 
 
-VMware Solution Exchange
+* VMware Solution Exchange
 
 [https://marketplace.vmware.com/vsx](https://marketplace.vmware.com/vsx)
 
 
 
-VCSA 6.5 HA 安装配置
+* VCSA 6.5 HA 安装配置
 
 [https://esxsi.com/2016/11/22/vcsa65-ha/](https://esxsi.com/2016/11/22/vcsa65-ha/)
 
 
 
-vSphere replication 6.x安装配置手册
+* vSphere replication 6.x安装配置手册
 
 [http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/](http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/)
 
