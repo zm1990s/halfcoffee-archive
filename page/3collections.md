@@ -39,7 +39,7 @@ type: page
 
 VMware 产品中文安装部署手册
 
-[链接](https://docs.vmware.com/cn/)
+[https://docs.vmware.com/cn/](https://docs.vmware.com/cn/)
 
 VMware产品间兼容列表查询：
 
@@ -69,13 +69,13 @@ VCSA 6.5 HA 安装配置
 
 vSphere replication 6.x安装配置手册
 
-http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/
+[http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/](http://www.settlersoman.com/how-to-install-and-configure-vmware-vsphere-replication-hypervisor-based-replication-6-0/)
 
 
 
 ## 精选博客
 
-virtuallyGhetto
+* virtuallyGhetto
 
 vRealize Automation、VSAN 专题比较多
 
@@ -85,7 +85,7 @@ vRealize Automation、VSAN 专题比较多
 
 
 
-vTricks
+* vTricks
 
 [http://vtricks.com/tag/vsan/](http://vtricks.com/tag/vsan/)
 
@@ -93,7 +93,7 @@ vTricks
 
 
 
-Yellow Bricks 
+* Yellow Bricks 
 
 VMware CTO，博客主要内容为VMware相关技术文档，有部分新产品技术介绍。
 
@@ -103,7 +103,7 @@ VMware CTO，博客主要内容为VMware相关技术文档，有部分新产品
 
 
 
-Cormac Hogan 
+* Cormac Hogan 
 
 VMware存储与高可用部门员工，博客内容以vSAN、vVOL为主
 
