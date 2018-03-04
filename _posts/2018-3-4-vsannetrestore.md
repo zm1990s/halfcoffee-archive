@@ -9,10 +9,6 @@ typora-root-url: ../../halfcoffee
 
 * content
 {:toc}
-
-
-
-
 ## 摘要
 
 > 从VSAN 6.6 开始，vSphere支持在部署VCSA时创建VSAN，然后将需要部署的VCSA存放在VSAN存储上。在此之前如果要部署VSAN，必须先找个服务器本地硬盘装好VCSA，然后再创建VSAN，最后再将vCenter迁移回VSAN环境。
@@ -121,3 +117,31 @@ VSAN 存储的容量有问题，只有单个ESXi主机的容量（正常应该�
 <img src="/pics/vsanrestore19.png" width="900">
 
 修复完毕！
+
+## 将VSAN网络从vSS迁回vDS
+
+现在VSAN已经恢复正常，vCenter也可以访问，有必要时可以再将vSAN的VMkernel迁移回vDS。
+
+<img src="/pics/vsanrestore20.png" width="400">
+
+<img src="/pics/vsanrestore21.png" width="700">
+
+<img src="/pics/vsanrestore22.png" width="700">
+
+<img src="/pics/vsanrestore23.png" width="700">
+
+<img src="/pics/vsanrestore24.png" width="700">
+
+<img src="/pics/vsanrestore25.png" width="700">
+
+<img src="/pics/vsanrestore26.png" width="700">
+
+<img src="/pics/vsanrestore27.png" width="700">
+
+<img src="/pics/vsanrestore28.png" width="700">
+
+<img src="/pics/vsanrestore29.png" width="700">
+
+VSAN 存储正常
+
+<img src="/pics/vsanrestore30.png" width="700">
