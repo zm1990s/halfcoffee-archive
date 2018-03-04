@@ -123,7 +123,9 @@ NSX Cross-VC环境支持Local-Egress功能，但是为了流量路径最优，�
 
 [https://communities.vmware.com/docs/DOC-36138](https://communities.vmware.com/docs/DOC-36138)
 
+### 防火墙基础
 
+此处推荐强叔侃墙，里面的内容基础全面易懂
 
 ### vRA环境下使用NSX微分段
 
