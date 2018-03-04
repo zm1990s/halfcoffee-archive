@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "一次 VSAN 误操作后的恢复纪实"
-date:   2018-3-3
+date:   2018-3-4
 categories: VSAN
 tags: VSAN esxcli unicastagent storage recovery
 typora-root-url: ../../halfcoffee
@@ -10,7 +10,10 @@ typora-root-url: ../../halfcoffee
 * content
 {:toc}
 
-##摘要
+
+
+
+## 摘要
 
 > 从VSAN 6.6 开始，vSphere支持在部署VCSA时创建VSAN，然后将需要部署的VCSA存放在VSAN存储上。在此之前如果要部署VSAN，必须先找个服务器本地硬盘装好VCSA，然后再创建VSAN，最后再将vCenter迁移回VSAN环境。
 >
@@ -67,7 +70,7 @@ VSAN 存储的容量有问题，只有单个ESXi主机的容量（正常应该�
 
 3、创建新的VSAN VMkernel，将其关联到新建的vSS，将其服务设定为VSAN
 
-##修复过程
+## 修复过程
 
 1、原来VSAN使用vmk1通信，但这个VMkernel已经无法管理，需要删除重建（或者保留这个配置，临时新建一套VSAN网络）
 
