@@ -189,5 +189,5 @@ typora-root-url: ../../halfcoffee
 
 ## 参考资料
 
-[NSX 6.3安装手册>卸载]([https://docs.vmware.com/en/VMware-NSX-for-vSphere/6.3/com.vmware.nsx.install.doc/GUID-33D4FCB4-A8C8-4307-B638-AA6BBA0AD2A5.html](https://docs.vmware.com/en/VMware-NSX-for-vSphere/6.3/com.vmware.nsx.install.doc/GUID-33D4FCB4-A8C8-4307-B638-AA6BBA0AD2A5.html))
+[NSX 6.3安装手册>卸载](https://docs.vmware.com/en/VMware-NSX-for-vSphere/6.3/com.vmware.nsx.install.doc/GUID-33D4FCB4-A8C8-4307-B638-AA6BBA0AD2A5.html)
 
