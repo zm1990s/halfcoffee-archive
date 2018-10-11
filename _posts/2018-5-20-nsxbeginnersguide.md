@@ -758,6 +758,113 @@ NSX 网络介绍部分到此结束，接下来的话题会从 Underlay 网络、
 - 开放 API，允许各种云管理平台接管，实现网络自动化部署；
 - 通过其他一些 API，能够实现虚拟网络的 360 度可视化运维。
 
- 
 
 可以说，NSX 是虚拟化网络改造的最佳方案，在兼容性、架构、性能等方面做到了极致的平衡。
+
+
+
+这篇文章很短，最近在看一些经典的云计算数据中心解决方案，看到了一个词：**VRF**，好像在前面的文章中遗漏了这一重要技术。
+
+VRF 的全称是 virtual routing and forwarding，其用途是允许同一个设备出现多个路由转发表，实现不同网络之间的流量隔离。
+
+回顾一下，在前面的文章中，我们介绍了 VLAN 技术，VLAN 可以实现二层网络隔离，保证不同 VLAN 的终端之间不通。而大部分时候，这些分隔的网络是要对外提供服务的，这时候引入了路由器，路由器可以实现不同网络之间的三层通信。
+
+再回过来看现在的虚拟化数据中心建设，我们需要：
+
+**1、安全分区**
+
+**2、统一资源池**
+
+这两个词几乎就是互斥的，安全分区要做到拆分隔离，而资源池要求统一管理。
+
+在 NSX 安全引入之后，问题变得简单一些，因为 NSX 分布式防火墙技术能够实现资源池内任意 VM 到任意 VM 的隔离。
+
+但是，问题并没有结束，架构中未提到物理网络！如果需要将物理网络与虚拟化网络连接起来，会遇到一个怎么连的问题。
+
+物理网络一般也会按照不同区域建设，要让每个网络都可以访问虚拟化中属于自己的业务，则必须都接入数据中心的网络，**这相当于把客户努力要隔离的网络又连在了一起**。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaicicOKKgL2Qe5EibNNwtqDwofSdBRlsAiaqtprroA2xlDBpHHleTzjMoIw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+原因在于，虚拟化资源池一般只有一套物理网络，对外只有一个出口：
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaI0lRZbGFEldoBf68UQ5MPztFjdZazAMqibPmSbib2dmV4QQRhWQW44jg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+------
+
+为了在安全隔离和资源池之间妥协，有三种解决方案：
+
+**1、多资源池**
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaIYLWdC4Tx3zT3Dhc3wia4X9z1GncsUoicW84EInl8vcicWIp8rXDSwwPA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+每个安全分区建设一套虚拟化环境，每套虚拟化环境有自己独立的服务器、网络和安全等设备。
+
+这种解决方案架构最清晰，但成本最高：
+
+- 每个资源池都需要购买硬件，硬件投入很大，整体资源利用率比较低；
+- 随着设备数量增多、管理域增多，管理成本上升；
+- 长期运营成本增加，这包括电力、空间、制冷等等成本。
+
+在这种架构下，有些资源还是可以共享的，比如共享存储、备份系统。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbanSdHHfdiaWmibmFqeBf1CCSIx63icLHUEpaEmr9ib9iaILhtee05BL34JiaQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+**2、VLAN 二层隔离**
+
+既然 VLAN 可以实现二层隔离，那理论上只要让端到端的网络只通过二层连接，就能通过 VLAN 来隔离。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaqM6ibrpY61UWKnvzZJfPajF9XFfEWtUhQngzhNrickBc1pmoHUda7h5g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+在这样的架构中，虚拟化有一个物理的资源池，网络设备均为一套，但是**所有虚拟化的交换机全部工作在二层转发模式，所有虚拟机的网关均在其对应区域的核心交换机上**。
+
+这样的架构的问题便是前面一直提到的：广播域过大，这里不再赘述。
+
+**3、VRF 三层隔离**
+
+回到一开始关于 VRF 的介绍，VRF 允许让一个路由设备(三层设备)存在多个路由转发表，实现三层网络的隔离。
+
+VRF 是个本地隔离技术，即关于一个 VRF 定义、接口关联配置、路由配置均在设备本地配置，不能传递给其他设备。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbavg0f5v4jaskeR4fp3MibqfumIkr8baR2BwZicLwyxRqe4uicCiasOyOQUQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+从大的角度看， VRF 隔离与 VLAN 隔离的架构会有一些相似：
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaA2JIa4UrPliaoDnkGRU9BNp2ubaYeDq7oszSM5C3aiczYl0cwTtYJDGA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+这样的架构下，隔离由两部分组成，虚线段使用 VLAN 隔离，实线段使用 VRF 隔离。
+
+------
+
+NSX 提供了第四种解决方案：**逻辑路由隔离**。
+
+上一篇简单讲解了 NSX 的一些组件， 逻辑交换机 LSW、分布式逻辑路由器 DLR、边界服务网关 ESG等。
+
+LSW 用于实现二层通信；DLR 连接多个 LSW，用于实现虚拟机之间的跨三层通信；ESG 用于连接虚拟化网络与物理网络。
+
+**以上所有组件均是通过软件实现，可以随意创建，搭配组合**。
+
+比如创建多个 LSW 给不同网络使用，与之对应，创建多个 DLR 处理三层流量，创建多个 ESG 负责不同网络的虚拟化与物理网络对接。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePPRVNRS1xGuE73QCcufUbaOTqY1oe64vsP1ReQC3Zc2MZ1g4vNCjIicPSWo6tBPbl7PnfpOlpy4vQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+**进行这样的网络改造，所有服务器端配置无需改变，需要的只是多创建几个虚拟机。**
+
+这样的改造之后，每台主机会有两个独立的 DLR 进程，可以根据需求运行静态路由、OSPF 或 BGP。
+
+这种架构原理与 VRF + VLAN 的组合类似，但有很多重要的区别：
+
+- VRF 依赖于物理设备的功能和架构，且每台设备需要独立配置，NSX 完全摆脱了对物理网络的依赖，架构更加灵活，配置更加方便，管理难度低；
+- VRF 必须在核心层交换机配置，是种集中式的隔离，NSX 是分布式架构，有第一跳优化，性能更佳；
+- VRF 在一台设备上配置，很难分割管理权限，NSX 的 LSW、DLR、ESG 均是独立的组件，可以交给不同用户授予不同的权限来进行管理。
+
+这个功能也使得 NSX 非常适合于多租户的场景，所有的网络功能都可以通过 NSX 开放接口进行自动配置，且原生隔离。搭配云管平台，创造出一套完整的网络环境，也就是分分钟的时间。
+
+------
+
+最后可能会有人问，通过多逻辑路由器的隔离和 NSX 防火墙隔离，有什么区别？
+
+如果仔细读过以前的文章，会发现两者最大的区别是物理网络架构的不同。
+
+如果客户有一个虚拟化，一套网络，为不同部门来提供服务，只是想实现不同部门之间的隔离，则可以用 NSX DFW 来做隔离。
+
+如果客户有一个虚拟化环境，但是有多个隔离的网络，或者有多个租户（通常多个租户都有自己的物理网络环境），则必须使用逻辑路由来实现网络隔离。
