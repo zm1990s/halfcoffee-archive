@@ -1275,10 +1275,103 @@ Commercial support is available at
 ```
 root@photon-1 [ ~ ]# route add -net 172.16.20.0/24 gw 192.168.0.12
 root@photon-2 [ ~ ]# route add -net 172.16.10.0/24 gw 192.168.0.11
-root@photon-1 [ ~ ]# systemctl stop iptables
-root@photon-2 [ ~ ]# systemctl stop iptables
 ```
 
+```
+默认 Docker 启用时会自动设置一些iptables的规则，比如默认是开启 NAT 功能的。
+
+通过下列命令，能查看详细的nat相关的防火墙规则
+root@photon-2 [ ~ ]# iptables -t nat -L -v
+Chain PREROUTING (policy ACCEPT 3 packets, 232 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    3   232 DOCKER     all  --  any    any     anywhere             anywhere             ADDRTYPE match dst-type LOCAL
+
+Chain INPUT (policy ACCEPT 1 packets, 64 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+
+Chain OUTPUT (policy ACCEPT 211 packets, 16915 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 DOCKER     all  --  any    any     anywhere            !localhost/8          ADDRTYPE match dst-type LOCAL
+
+Chain POSTROUTING (policy ACCEPT 211 packets, 16915 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 MASQUERADE  all  --  any    !docker0  172.16.10.0/24       anywhere
+
+Chain DOCKER (2 references)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 RETURN     all  --  docker0 any     anywhere             anywhere
+
+```
+
+```
+下面命令，查看详细的filter防火墙规则
+
+root@photon-2 [ ~ ]# iptables -L -v
+Chain INPUT (policy DROP 2 packets, 168 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+  204 14899 ACCEPT     all  --  lo     any     anywhere             anywhere
+  201 24340 ACCEPT     all  --  any    any     anywhere             anywhere             ctstate RELATED,ESTABLISHED
+    1    64 ACCEPT     tcp  --  any    any     anywhere             anywhere             tcp dpt:ssh
+
+Chain FORWARD (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 DOCKER-USER  all  --  any    any     anywhere             anywhere
+    0     0 DOCKER-ISOLATION-STAGE-1  all  --  any    any     anywhere             anywhere
+    0     0 ACCEPT     all  --  any    docker0  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  any    docker0  anywhere             anywhere
+    0     0 ACCEPT     all  --  docker0 !docker0  anywhere             anywhere
+    0     0 ACCEPT     all  --  docker0 docker0  anywhere             anywhere
+
+Chain OUTPUT (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+  421 36043 ACCEPT     all  --  any    any     anywhere             anywhere
+
+Chain DOCKER (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 DOCKER-ISOLATION-STAGE-2  all  --  docker0 !docker0  anywhere             anywhere
+    0     0 RETURN     all  --  any    any     anywhere             anywhere
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 DROP       all  --  any    docker0  anywhere             anywhere
+    0     0 RETURN     all  --  any    any     anywhere             anywhere
+
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 RETURN     all  --  any    any     anywhere             anywhere
+```
+
+```
+如果发现宿主机之间网络不通，可以通过添加防火墙规则解决：
+iptables -I INPUT -p icmp -j ACCEPT
+iptables -I INPUT -P tcp --dport 22 ACCEPT
+iptables -I OUTPUT -j ACCEPT
+```
+
+```
+我们需要做的是修改默认的防火墙策略和 NAT 规则，按照 Docker 文档的建议，不要修改 DOCKER 的 Chain，而是修改 DOCKER-USER 的 Chain。
+以下两条命令分别修改：
+对端到本端docker网段放行
+本端访问对端docker网段时，不进行NAT操作
+
+root@photon-1 [ ~ ]# iptables -I DOCKER-USER -s 172.16.20.0/24 -d 172.16.10.0/24 -j ACCEPT
+root@photon-1 [ ~ ]# iptables -t nat -I POSTROUTING -s 172.16.10.0/24 -d 172.16.20.0/24 -j ACCEPT
+
+root@photon-2 [ ~ ]# iptables -I DOCKER-USER -s 172.16.10.0/24 -d 172.16.20.0/24 -j ACCEPT
+root@photon-2 [ ~ ]# iptables -t nat -I POSTROUTING -s 172.16.20.0/24 -d 172.16.10.0/24 -j ACCEPT
+
+-t nat 代表修改nat规则
+-I 代表在列表前方插入
+-A 代表在列表后方添加
+-s 代表源地址
+-d 代表目标地址
+-j 代表动作
+-i 代表入向接口
+-o 代表出向接口
+```
 
 
 ```
@@ -1287,15 +1380,17 @@ PING 172.15.20.254 (172.15.20.254) 56(84) bytes of data.
 64 bytes from 172.15.20.254: icmp_seq=1 ttl=50 time=227 ms
 64 bytes from 172.15.20.254: icmp_seq=2 ttl=50 time=229 ms
 
-
 root@photon-2 [ ~ ]# ping 172.16.10.254
 PING 172.16.10.254 (172.16.10.254) 56(84) bytes of data.
 64 bytes from 172.16.10.254: icmp_seq=1 ttl=64 time=0.501 ms
 64 bytes from 172.16.10.254: icmp_seq=2 ttl=64 time=1.16 ms
 ```
 
+```
+
 分别在两台宿主机上创建容器，测试容器之间可以通，服务访问正常。
 
+```
 ```
 root@photon-1 [ ~ ]# docker run --rm -it  --hostname=test1 nginx:1 bash
 
@@ -1303,10 +1398,12 @@ root@test1:/# ping 172.16.20.1
 PING 172.16.20.1 (172.16.20.1): 56 data bytes
 64 bytes from 172.16.20.1: icmp_seq=0 ttl=62 time=0.857 ms
 
-
 root@test2:/# service nginx start
 
 root@test1:/# curl 172.16.20.1
+```
+
+
 <h1>Hello, Docker!</h1>
 <h2>this is test2</h2>
 
@@ -1332,5 +1429,16 @@ https://yeasy.gitbooks.io/docker_practice/content/image/pull.html
 
 
 ```
+
+```
+tshark
+
+usermod -a -G wireshark test1 
+
+newgrp wireshark
+
+chgrp wireshark /usr/sbin/dumpcap
+
+tshark -i eth0 -w outfile
 
 ```
