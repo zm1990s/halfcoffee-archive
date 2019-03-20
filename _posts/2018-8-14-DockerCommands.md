@@ -1276,11 +1276,11 @@ Commercial support is available at
 root@photon-1 [ ~ ]# route add -net 172.16.20.0/24 gw 192.168.0.12
 root@photon-2 [ ~ ]# route add -net 172.16.10.0/24 gw 192.168.0.11
 ```
-
-```
 默认 Docker 启用时会自动设置一些iptables的规则，比如默认是开启 NAT 功能的。
 
 通过下列命令，能查看详细的nat相关的防火墙规则
+```
+
 root@photon-2 [ ~ ]# iptables -t nat -L -v
 Chain PREROUTING (policy ACCEPT 3 packets, 232 bytes)
  pkts bytes target     prot opt in     out     source               destination
@@ -1302,9 +1302,9 @@ Chain DOCKER (2 references)
     0     0 RETURN     all  --  docker0 any     anywhere             anywhere
 
 ```
-
-```
 下面命令，查看详细的filter防火墙规则
+```
+
 
 root@photon-2 [ ~ ]# iptables -L -v
 Chain INPUT (policy DROP 2 packets, 168 bytes)
@@ -1343,26 +1343,27 @@ Chain DOCKER-USER (1 references)
  pkts bytes target     prot opt in     out     source               destination
     0     0 RETURN     all  --  any    any     anywhere             anywhere
 ```
-
-```
 如果发现宿主机之间网络不通，可以通过添加防火墙规则解决：
+```
+
 iptables -I INPUT -p icmp -j ACCEPT
 iptables -I INPUT -P tcp --dport 22 ACCEPT
 iptables -I OUTPUT -j ACCEPT
 ```
 
-```
+
 我们需要做的是修改默认的防火墙策略和 NAT 规则，按照 Docker 文档的建议，不要修改 DOCKER 的 Chain，而是修改 DOCKER-USER 的 Chain。
 以下两条命令分别修改：
 对端到本端docker网段放行
 本端访问对端docker网段时，不进行NAT操作
 
+```
 root@photon-1 [ ~ ]# iptables -I DOCKER-USER -s 172.16.20.0/24 -d 172.16.10.0/24 -j ACCEPT
 root@photon-1 [ ~ ]# iptables -t nat -I POSTROUTING -s 172.16.10.0/24 -d 172.16.20.0/24 -j ACCEPT
 
 root@photon-2 [ ~ ]# iptables -I DOCKER-USER -s 172.16.10.0/24 -d 172.16.20.0/24 -j ACCEPT
 root@photon-2 [ ~ ]# iptables -t nat -I POSTROUTING -s 172.16.20.0/24 -d 172.16.10.0/24 -j ACCEPT
-
+```
 -t nat 代表修改nat规则
 -I 代表在列表前方插入
 -A 代表在列表后方添加
@@ -1371,7 +1372,7 @@ root@photon-2 [ ~ ]# iptables -t nat -I POSTROUTING -s 172.16.20.0/24 -d 172.16.
 -j 代表动作
 -i 代表入向接口
 -o 代表出向接口
-```
+
 
 
 ```
@@ -1386,11 +1387,11 @@ PING 172.16.10.254 (172.16.10.254) 56(84) bytes of data.
 64 bytes from 172.16.10.254: icmp_seq=2 ttl=64 time=1.16 ms
 ```
 
-```
+
 
 分别在两台宿主机上创建容器，测试容器之间可以通，服务访问正常。
 
-```
+
 ```
 root@photon-1 [ ~ ]# docker run --rm -it  --hostname=test1 nginx:1 bash
 
@@ -1401,7 +1402,7 @@ PING 172.16.20.1 (172.16.20.1): 56 data bytes
 root@test2:/# service nginx start
 
 root@test1:/# curl 172.16.20.1
-```
+
 
 
 <h1>Hello, Docker!</h1>
@@ -1440,5 +1441,7 @@ newgrp wireshark
 chgrp wireshark /usr/sbin/dumpcap
 
 tshark -i eth0 -w outfile
+
+```
 
 ```
