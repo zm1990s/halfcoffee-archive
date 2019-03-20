@@ -530,7 +530,8 @@ RUN buildDeps='gcc libc6-dev make wget' \
     && rm -rf /var/lib/apt/lists/* \
     && rm redis.tar.gz \
     && rm -r /usr/src/redis \
-    && apt-get purge -y --auto-remove $buildDeps
+    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 ```
 
 首先，之前所有的命令只有一个目的，就是编译、安装 redis 可执行文件。因此没有必要建立很多层，这只是一层的事情。因此，这里没有使用很多个 `RUN` 对一一对应不同的命令，而是仅仅使用一个 `RUN` 指令，并使用 `&&` 将各个所需命令串联起来。将之前的 7 层，简化为了 1 层。在撰写 Dockerfile 的时候，要经常提醒自己，这并不是在写 Shell 脚本，**而是在定义每一层该如何构建**。
@@ -707,7 +708,7 @@ ENTRYPOINT service tomcat7 start && /usr/sbin/sshd -D
 
 # 创建、运行容器
 
-<img src="/pics/docker/2.jpeg" width="400">
+<img src="/pics/docker/2.jpeg" width="500">
 
 ### run 运行
 
@@ -1053,7 +1054,271 @@ PING busybox2 (172.19.0.3): 56 data bytes
 > 注意：如果在容器启动时没有指定最后两个参数，Docker 会默认用主机上的 `/etc/resolv.conf` 来配置容器。
 >
 
-## Docker 宿主机之间的互联
+## Docker 宿主机之间的互联(静态路由方式)
+
+### 创建两台docker宿主机
+
+为了简便，直接使用了 VMware 出的 Photon虚拟机，下载地址见：
+
+[https://github.com/vmware/photon/wiki/Downloading-Photon-OS](https://github.com/vmware/photon/wiki/Downloading-Photon-OS)
+
+```
+root@photon-machine [ ~ ]# docker version
+Client:
+ Version:           18.06.2
+ API version:       1.38
+ Go version:        go1.10.7
+ Git commit:        6d37f41
+ Built:             Mon Feb 25 14:49:01 2019
+ OS/Arch:           linux/amd64
+ Experimental:      false
+
+Server:
+ Engine:
+  Version:          18.06.2-ce
+  API version:      1.38 (minimum version 1.12)
+  Go version:       go1.10.7
+  Git commit:       6d37f41
+  Built:            Mon Feb 25 14:54:48 2019
+  OS/Arch:          linux/amd64
+  Experimental:     false
+
+```
+
+<img src="/pics/docker/3.jpg" width="500">
+
+每个宿主机至少有一个 eth0，一个 docker0 网络，docker0 是用于桥接容器的网络，有一个地址段，可以修改。
+
+```
+root@photon-machine [ ~ ]# ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:e1:eb:f0:f4
+          inet addr:172.16.10.254  Bcast:172.16.10.255  Mask:255.255.255.0
+          inet6 addr: fe80::42:e1ff:feeb:f0f4/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:10507 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:14090 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:461122 (461.1 KB)  TX bytes:68481333 (68.4 MB)
+
+eth0      Link encap:Ethernet  HWaddr 00:0c:29:b0:6c:cb
+          inet addr:192.168.225.165  Bcast:192.168.225.255  Mask:255.255.255.0
+          inet6 addr: fe80::20c:29ff:feb0:6ccb/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:56214 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:16007 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:71511188 (71.5 MB)  TX bytes:1502107 (1.5 MB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:394 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:394 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:29138 (29.1 KB)  TX bytes:29138 (29.1 KB)
+```
+
+
+
+Docker 建议的修改方式是（如果daemon.json 不存在，则创建一个）：
+
+```
+vi /etc/docker/daemon.json
+
+{
+  "bip": "172.16.10.254/24",
+  "fixed-cidr": "172.16.10.1/24",
+  "mtu": 1500,
+  "default-gateway": "172.16.10.100",
+  "dns": ["172.16.10.2"]
+}
+```
+
+- bip 表示桥（docker0）的 IP 地址
+
+- fixed-cidr 表示对于容器来说可用的 IP 地址空间，可以写成 172.16.10.1/25
+
+- default-gateway 指定 docker0 的网关地址，测试发现如果要让容器使用桥地址为网关，不能设置此项，**仅在网关不同于桥地址时才需要设置**。
+
+- dns 指定 DNS 服务器
+
+使用命令`brctl show`可以查看系统已有的桥
+
+如果以上命令不存在，可以使用`yum install bridge-utils`安装
+
+
+
+通过同样的方式编辑另外一台宿主机
+
+### 创建一个测试网络的Ubuntu镜像
+
+编辑一个Dockerfile文件，安装 ifconfig、 ping、nano、traceroute、curl 等基础工具
+
+```
+FROM nginx
+COPY ./ping4 /usr/bin/ping4
+RUN chmod 777 /usr/bin/ping4 \
+    && buildDeps='net-tools nano traceroute curl inetutils-ping' \
+    && apt-get update \
+    && apt-get install -y $buildDeps \
+    && apt-get -s clean \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+运行并测试
+
+```
+docker build -t nginx:1 .
+```
+
+```
+docker run --rm -it -p 8080:80 --hostname=test1 nginx:1 bash
+
+root@test1:/# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.16.10.1  netmask 255.255.255.0  broadcast 172.16.10.255
+        ether 02:42:ac:10:0a:01  txqueuelen 0  (Ethernet)
+        RX packets 10  bytes 836 (836.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+    
+```
+
+再创建第二个容器
+
+```
+docker run --rm -it -p 8088:80 --hostname=test2 nginx:1 bash
+
+root@test2:/# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.16.10.2  netmask 255.255.255.0  broadcast 172.16.10.255
+        ether 02:42:ac:10:0a:02  txqueuelen 0  (Ethernet)
+        RX packets 3  bytes 266 (266.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+```
+
+相互通信测试：
+
+```
+root@test1:/# ping 172.16.10.2
+PING 172.16.10.2 (172.16.10.2): 56 data bytes
+64 bytes from 172.16.10.2: icmp_seq=0 ttl=64 time=0.055 ms
+64 bytes from 172.16.10.2: icmp_seq=1 ttl=64 time=0.062 ms
+
+```
+
+```
+root@test2:/# service nginx start
+```
+
+
+```
+root@test1:/# curl 172.16.10.2
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+```
+
+通过以上测试，发现默认的桥下容器之间是可以直接互通的。
+
+在创建容器时，我们也做了容器到宿主机的 NAT，所以通过宿主机是可以直接访问容器中的nginx服务的（http://宿主机IP:8088）
+
+### 打通两台宿主机之间路由
+
+
+
+现在已经创建好了两台宿主机，且每个宿主机都有自己特定的docker网络，现在需要做的是配置静态路由，打通两个容器网络
+
+```
+root@photon-1 [ ~ ]# route add -net 172.16.20.0/24 gw 192.168.0.12
+root@photon-2 [ ~ ]# route add -net 172.16.10.0/24 gw 192.168.0.11
+root@photon-1 [ ~ ]# systemctl stop iptables
+root@photon-2 [ ~ ]# systemctl stop iptables
+```
+
+
+
+```
+root@photon-1 [ ~ ]# ping 172.15.20.254
+PING 172.15.20.254 (172.15.20.254) 56(84) bytes of data.
+64 bytes from 172.15.20.254: icmp_seq=1 ttl=50 time=227 ms
+64 bytes from 172.15.20.254: icmp_seq=2 ttl=50 time=229 ms
+
+
+root@photon-2 [ ~ ]# ping 172.16.10.254
+PING 172.16.10.254 (172.16.10.254) 56(84) bytes of data.
+64 bytes from 172.16.10.254: icmp_seq=1 ttl=64 time=0.501 ms
+64 bytes from 172.16.10.254: icmp_seq=2 ttl=64 time=1.16 ms
+```
+
+分别在两台宿主机上创建容器，测试容器之间可以通，服务访问正常。
+
+```
+root@photon-1 [ ~ ]# docker run --rm -it  --hostname=test1 nginx:1 bash
+
+root@test1:/# ping 172.16.20.1
+PING 172.16.20.1 (172.16.20.1): 56 data bytes
+64 bytes from 172.16.20.1: icmp_seq=0 ttl=62 time=0.857 ms
+
+
+root@test2:/# service nginx start
+
+root@test1:/# curl 172.16.20.1
+<h1>Hello, Docker!</h1>
+<h2>this is test2</h2>
+
+```
+
+如果此时用宿主机访问容器的服务，应该也是可以正常通行的。
+
+
+
+<img src="/pics/docker/4.png" width="400">
+
+<img src="/pics/docker/5.png" width="400">
 
 
 
@@ -1065,3 +1330,7 @@ PING busybox2 (172.19.0.3): 56 data bytes
 
 https://yeasy.gitbooks.io/docker_practice/content/image/pull.html
 
+
+```
+
+```
