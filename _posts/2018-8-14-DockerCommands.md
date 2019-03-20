@@ -11,11 +11,119 @@ typora-root-url: ../../halfcoffee
 {:toc}
 > 边学习边收集一些命令
 
-## 常用命令汇总
+# 基础概念
 
-`docker run -p 宿主机端口：应用端口 -e HOSTNAME=Ngnix-Server1 --name webserver nginx`
+## Aufs
+
+
+
+层状的文件系统，类似于PS的图层。
+
+当一个进程需要修改一个文件时，AuFS创建该文件的副本，这个过程称为copy on write
+
+
+
+AuFS 允许Docker 把某些镜像作为容器的基础，例如 Centos 基础镜像。
+
+
+
+AUFS 可以实现Docker的版本容器镜像能力。每个新版本都是与之前版本的简单差异改动。保持镜像文件最小化。
+
+但同时也需要一个记录版本变动的审计追踪。
+
+
+
+## APP打包
+
+<img src="/pics/docker/1.png" width="400">
+
+LXC基础上，提供统一的打包部署运行方案。
+
+一个 Image 实际可能由多个layer组成，例如apache是由apache+依赖库的Image合并在一起。最上层有一个可写的空白的层。
+
+## Docker Image
+
+是个极度精简的Linux运行环境
+
+Docker image 是需要定制化Build的安装包。由基础镜像+APP二进制包 组成
+
+Docker image 内的配置文件不建议在上线后修改。
+
+一般配置文件通过参数的方式传递到内部去。
+
+Dockerfile 用来创建自定义的Image，包含用户自定义的软件依赖等
+
+Docker image推荐重用和使用网上公开的基础镜像。
+
+## Docker Container
+
+是image的实例。
+
+container里可以运行不同OS的image。
+
+不建议使用SSH登录容器。
+
+1.3版本之后增加了**docker exec**来进入容器
+
+
+
+## 生命周期
+
+Created
+
+Running
+
+Paused
+
+Stopped
+
+Killed
+
+
+
+Container 只能在前台运行，因为一个命令结束后（后台一下子就结束了），container就执行完毕了。
+
+
+
+## Docker Daemon
+
+Container 的Linux守护进程。
+
+Docker Daemon 可以绑定本地端口并提供Rest API 服务，用来远程访问和控制(K8S调用此接口)
+
+
+
+## Docker Hub
+
+Docker 的镜像库，公开的，但是是dotCloud私有的。
+
+
+
+## 镜像制作
+
+commit 将已有的容器制作成image，但是因为运行的容器会有很   多更改，导致commit制作的image不够精简。比较适合快速的验证。
+
+Dockerfile，最标准的打包方法。
+
+
+
+# 常用命令汇总
+
+`docker run -rm -p 宿主机端口：应用端口 -e HOSTNAME=Ngnix-Server1 --name webserver nginx`
 
 运行容器，名称为 webserver，使用 nginx image，设置环境变量Hostname、设置端口映射。
+
+docker run 相当于创建并start此容器，建议在测试时加上`-rm` 参数，**在容器运行完毕后自动删除此容器**。
+
+
+
+`docker ps -a` ，查看所有创建的容器
+
+
+
+`docker ps` ，查看所有活动的容器
+
+
 
 `docker exec -it webserver bash`
 
@@ -64,6 +172,22 @@ typora-root-url: ../../halfcoffee
 
 
 
+创建 Dockerfile
+
+```
+mattz-a01:docker mattz$ cat Dockerfile
+
+FROM nginx
+COPY about.html /usr/share/nginx/html/index.html
+#RUN echo '<h2>This is H2!</h2>' >> /usr/share/nginx/html/index.html
+```
+编译
+```
+docker build -t nginx:test1 .
+```
+
+# Image 相关
+
 ## 获取镜像
 
 之前提到过，[Docker Hub](https://hub.docker.com/explore/) 上有大量的高质量的镜像可以用，这里我们就说一下怎么获取这些镜像。
@@ -100,81 +224,6 @@ Status: Downloaded newer image for ubuntu:16.04
 从下载过程中可以看到我们之前提及的分层存储的概念，**镜像是由多层存储所构成。下载也是一层层的去下载**，并非单一文件。下载过程中给出了每一层的 ID 的前 12 位。并且下载结束后，给出该镜像完整的 `sha256` 的摘要，以确保下载一致性。
 
 在使用上面命令的时候，你可能会发现，你所看到的层 ID 以及 `sha256` 的摘要和这里的不一样。这是因为官方镜像是一直在维护的，有任何新的 bug，或者版本更新，都会进行修复再以原来的标签发布，这样可以确保任何使用这个标签的用户可以获得更安全、更稳定的镜像。
-
-
-
-### run 运行
-
-`docker run  [OPTIONS]  IMAGE[:TAG] [COMMAND] [ARG…]`
-
-run 表示**创建并启动**一个容器，建议使用create、start这样的命令。
-
-有了镜像后，我们就能够以这个镜像为基础启动并运行一个容器。以上面的 `ubuntu:16.04` 为例，如果我们打算启动里面的 `bash` 并且进行交互式操作的话，可以执行下面的命令。
-
-```
-$ docker run -it --rm \
-    ubuntu:16.04 \
-    bash
-
-root@e7009c6ce357:/# cat /etc/os-release
-NAME="Ubuntu"
-VERSION="16.04.4 LTS, Trusty Tahr"
-ID=ubuntu
-ID_LIKE=debian
-PRETTY_NAME="Ubuntu 16.04.4 LTS"
-VERSION_ID="16.04"
-HOME_URL="http://www.ubuntu.com/"
-SUPPORT_URL="http://help.ubuntu.com/"
-BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
-
-```
-
-`docker run` 就是运行容器的命令，具体格式我们会在 [容器](https://yeasy.gitbooks.io/docker_practice/content/container) 一节进行详细讲解，我们这里简要的说明一下上面用到的参数。
-
-- `-it`：这是两个参数，一个是 `-i`：交互式操作，一个是 `-t` 终端。我们这里打算进入 `bash` 执行一些命令并查看返回结果，因此我们需要交互式终端。
-- `--rm`：这个参数是说容器退出后随之将其删除。默认情况下，为了排障需求，退出的容器并不会立即删除，除非手动 `docker rm`。我们这里只是随便执行个命令，看看结果，不需要排障和保留结果，因此使用 `--rm` 可以避免浪费空间。
-- `ubuntu:16.04`：这是指用 `ubuntu:16.04` 镜像为基础来启动容器。
-- `bash`：放在镜像名后的是**命令**，这里我们希望有个交互式 Shell，因此用的是 `bash`。
-- `-d` ： 放在后台执行
-- `--name=centos-test1`：如果不指定名称，则会随机生成一个UUID，并不适合管理
-
-进入容器后，我们可以在 Shell 下操作，执行任何所需的命令。这里，我们执行了 `cat /etc/os-release`，这是 Linux 常用的查看当前系统版本的命令，从返回的结果可以看到容器内是 `Ubuntu 16.04.4 LTS` 系统。
-
-最后我们通过 `exit` 退出了这个容器。
-
-### create、start、pause、unpause
-
-使用 run 运行容器后，如果exit，则容器就终止了，docker ps -all 可以看到这个容器处于退出状态。
-
-如果要运行，可以用 `docker start centos-test1` 来运行。
-
-一般常见的方法是先创建，然后start
-
-`docker create -it --name=centos-test1 centos`
-
-`docker start centos centos-test1`
-
-
-
-### 环境变量
-
-在docker run后面加env可以获取环境变量
-
-```
-mattz-a01:~ mattz$ docker run centos env
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=9c2b8076e5a8
-HOME=/rootx
-mattz-a01:~ mattz$
-```
-
-`docker create  --name=test1 -e HOSTNAME=test1 centos`
-
-`docker start test1`
-
-`docker exec -it test1 bash`
-
-`env`，即可看到我们设置的环境变量Hostname
 
 
 
@@ -226,8 +275,9 @@ Build Cache                                                 0B                  
 
 ```
 $ docker image rm [选项] <镜像1> [<镜像2> ...]
-
 ```
+
+
 
 ### 用 ID、镜像名、摘要删除镜像
 
@@ -285,82 +335,6 @@ Untagged: node@sha256:b4f0e0bdeb578043c1ea6862f0d40cc4afe32a4a582f3be235a3b16442
 ```
 
 
-
-
-
-## 容器互联
-
-如果你之前有 `Docker` 使用经验，你可能已经习惯了使用 `--link` 参数来使容器互联。
-
-随着 Docker 网络的完善，强烈建议大家将容器加入自定义的 Docker 网络来连接多个容器，而不是使用 `--link` 参数。
-
-### 新建网络
-
-下面先创建一个新的 Docker 网络。
-
-```
-$ docker network create -d bridge my-net
-
-```
-
-`-d` 参数指定 Docker 网络类型，有 `bridge` `overlay`。其中 `overlay` 网络类型用于 [Swarm mode](https://yeasy.gitbooks.io/docker_practice/content/swarm_mode)，在本小节中你可以忽略它。
-
-### 连接容器
-
-运行一个容器并连接到新建的 `my-net` 网络
-
-```
-$ docker run -it --rm --name busybox1 --network my-net busybox sh
-
-```
-
-打开新的终端，再运行一个容器并加入到 `my-net` 网络
-
-```
-$ docker run -it --rm --name busybox2 --network my-net busybox sh
-
-```
-
-再打开一个新的终端查看容器信息
-
-```
-$ docker container ls
-
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-b47060aca56b        busybox             "sh"                11 minutes ago      Up 11 minutes                           busybox2
-8720575823ec        busybox             "sh"                16 minutes ago      Up 16 minutes                           busybox1
-
-```
-
-下面通过 `ping` 来证明 `busybox1` 容器和 `busybox2` 容器建立了互联关系。
-
-在 `busybox1` 容器输入以下命令
-
-```
-/ # ping busybox2
-PING busybox2 (172.19.0.3): 56 data bytes
-64 bytes from 172.19.0.3: seq=0 ttl=64 time=0.072 ms
-64 bytes from 172.19.0.3: seq=1 ttl=64 time=0.118 ms
-```
-
-
-
-
-
-## docker 手动配置 DNS
-
-
-
-如果用户想要手动指定容器的配置，可以在使用 `docker run` 命令启动容器时加入如下参数：
-
-`-h HOSTNAME` 或者 `--hostname=HOSTNAME` 设定容器的主机名，它会被写到容器内的 `/etc/hostname` 和 `/etc/hosts`。但它在容器外部看不到，既不会在 `docker container ls` 中显示，也不会在其他的容器的 `/etc/hosts` 看到。
-
-`--dns=IP_ADDRESS` 添加 DNS 服务器到容器的 `/etc/resolv.conf` 中，让容器用这个服务器来解析所有不在 `/etc/hosts` 中的主机名。
-
-`--dns-search=DOMAIN` 设定容器的搜索域，当设定搜索域为 `.example.com` 时，在搜索一个名为 host 的主机时，DNS 不仅搜索 host，还会搜索 `host.example.com`。
-
-> 注意：如果在容器启动时没有指定最后两个参数，Docker 会默认用主机上的 `/etc/resolv.conf` 来配置容器。
->
 
 ## Docker commit
 
@@ -601,7 +575,7 @@ docker build [选项] <上下文路径/URL/->
 
 首先我们要理解 `docker build` 的工作原理。Docker 在运行时分为 Docker 引擎（也就是服务端守护进程）和客户端工具。Docker 的引擎提供了一组 REST API，被称为 [Docker Remote API](https://docs.docker.com/develop/sdk/)，而如 `docker`命令这样的客户端工具，则是通过这组 API 与 Docker 引擎交互，从而完成各种功能。因此，虽然表面上我们好像是在本机执行各种 `docker` 功能，但实际上，一切都是使用的远程调用形式在服务端（Docker 引擎）完成。也因为这种 C/S 设计，让我们操作远程服务器的 Docker 引擎变得轻而易举。
 
-当我们进行镜像构建的时候，并非所有定制都会通过 `RUN` 指令完成，经常会需要将一些本地文件复制进镜像，比如通过 `COPY` 指令、`ADD` 指令等。而 `docker build` 命令构建镜像，其实并非在本地构建，而是在服务端，也就是 Docker 引擎中构建的。那么在这种客户端/服务端的架构中，如何才能让服务端获得本地文件呢？
+当我们进行镜像构建的时候，并非所有定制都会通过 `RUN` 指令完成，经常会需要将一些本地文件复制进镜像，比如通过 `COPY` 指令、`ADD`指令等。而 `docker build` 命令构建镜像，其实并非在本地构建，而是在服务端，也就是 Docker 引擎中构建的。那么在这种客户端/服务端的架构中，如何才能让服务端获得本地文件呢？
 
 这就引入了上下文的概念。当构建的时候，用户会指定构建镜像上下文的路径，`docker build` 命令得知这个路径后，会将路径下的所有内容打包，然后上传给 Docker 引擎。这样 Docker 引擎收到这个上下文包后，展开就会获得构建镜像所需的一切文件。
 
@@ -609,6 +583,7 @@ docker build [选项] <上下文路径/URL/->
 
 ```Dockerfile
 COPY ./package.json /app/
+ADD ./package.json /app/
 ```
 
 这并不是要复制执行 `docker build` 命令所在的目录下的 `package.json`，也不是复制 `Dockerfile`所在目录下的 `package.json`，而是复制 **上下文（context）** 目录下的 `package.json`。
@@ -683,6 +658,406 @@ $ docker build - < context.tar.gz
 ```
 
 如果发现标准输入的文件格式是 `gzip`、`bzip2` 以及 `xz` 的话，将会使其为上下文压缩包，直接将其展开，将里面视为上下文，并开始构建。
+
+
+
+#### 添加HTTP代理
+
+在 Dockerfile 中新增一行，ENV
+
+ENV http_proxy=http://XXX.XXX.XXX
+
+RUN curl http://www.baidu.com
+
+
+
+### 一个Dockerfile 的案例
+
+```
+FROM ubuntu
+MAINTAINER yongboy "yongboy@gmail.com"
+#更新源，安装ssh server
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe"> /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y openssh-server
+RUN mkdir -p /var/run/sshd
+# 设置root ssh远程登录密码为123456
+RUN echo "root:123456" | chpasswd
+# 添加orache java7源，一次性安装vim，wget，curl，java7，tomcat7等必备软件
+RUN apt-get install python-software-properties
+RUN add-apt-repository ppa:webupd8team/java
+RUN apt-get update
+RUN apt-get install -y vim wget curl oracle-java7-installer tomcat7
+
+# 设置JAVA_HOME环境变量
+RUN update-alternatives --display java
+RUN echo "JAVA_HOME=/usr/lib/jvm/java-7-oracle">> /etc/environment RUN echo "JAVA_HOME=/usr/lib/jvm/java-7-oracle">> /etc/default/tomcat7
+# 容器需要开放SSH 22端口 
+EXPOSE 22
+# 容器需要开放Tomcat 8080端口 
+EXPOSE 8080
+# 设置Tomcat7初始化运行，SSH终端服务器作为后台运行 
+ENTRYPOINT service tomcat7 start && /usr/sbin/sshd -D
+
+```
+
+
+
+
+
+# 创建、运行容器
+
+<img src="/pics/docker/2.jpeg" width="400">
+
+### run 运行
+
+`docker run  [OPTIONS]  IMAGE[:TAG] [COMMAND] [ARG…]`
+
+run 表示**创建并启动**一个容器。
+
+有了镜像后，我们就能够以这个镜像为基础启动并运行一个容器。以上面的 `ubuntu:16.04` 为例，如果我们打算启动里面的 `bash` 并且进行交互式操作的话，可以执行下面的命令。
+
+```
+$ docker run -it --rm \
+    ubuntu:16.04 \
+    bash
+
+root@e7009c6ce357:/# cat /etc/os-release
+NAME="Ubuntu"
+VERSION="16.04.4 LTS, Trusty Tahr"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 16.04.4 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+
+```
+
+`docker run` 就是运行容器的命令，具体格式我们会在 [容器](https://yeasy.gitbooks.io/docker_practice/content/container) 一节进行详细讲解，我们这里简要的说明一下上面用到的参数。
+
+- `-it`：这是两个参数，一个是 `-i`：交互式操作，一个是 `-t` 终端。我们这里打算进入 `bash` 执行一些命令并查看返回结果，因此我们需要交互式终端。
+- `--rm`：这个参数是说容器退出后随之将其删除。默认情况下，为了排障需求，退出的容器并不会立即删除，除非手动 `docker rm`。我们这里只是随便执行个命令，看看结果，不需要排障和保留结果，因此使用 `--rm` 可以避免浪费空间。
+- `ubuntu:16.04`：这是指用 `ubuntu:16.04` 镜像为基础来启动容器。
+- `bash`：放在镜像名后的是**命令**，这里我们希望有个交互式 Shell，因此用的是 `bash`。
+- `-d` ： 放在后台执行
+- `--name=centos-test1`：如果不指定名称，则会随机生成一个UUID，并不适合管理
+
+进入容器后，我们可以在 Shell 下操作，执行任何所需的命令。这里，我们执行了 `cat /etc/os-release`，这是 Linux 常用的查看当前系统版本的命令，从返回的结果可以看到容器内是 `Ubuntu 16.04.4 LTS` 系统。
+
+最后我们通过 `exit` 退出了这个容器。
+
+### create、start、pause、unpause
+
+使用 run 运行容器后，如果exit，则容器就终止了，docker ps -all 可以看到这个容器处于退出状态。
+
+如果要运行，可以用 `docker start centos-test1` 来运行。
+
+一般常见的方法是先创建，然后start
+
+`docker create -it --name=centos-test1 centos`
+
+`docker start centos centos-test1`
+
+
+
+### 环境变量
+
+在docker run后面加env可以获取环境变量
+
+```
+mattz-a01:~ mattz$ docker run centos env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=9c2b8076e5a8
+HOME=/rootx
+mattz-a01:~ mattz$
+```
+
+`docker create  --name=test1 -e HOSTNAME=test1 centos`
+
+`docker start test1`
+
+`docker exec -it test1 bash`
+
+`env`，即可看到我们设置的环境变量Hostname
+
+
+
+## 数据卷
+
+### Volume 来源
+
+Volume的来源：
+
+正常，在Docker的宿主机中，有三个文件：
+
+/var/lib/docker/graph ，存储本地 Image 的分层信息
+
+/var/lib/docker/devicemapper/devicemapper/data，存储所有容器的Image、Container、writable内容，是个文件
+
+/var/lib/docker/devicemapper/devicemapper/metadata，存储相关的元数据
+
+如果用AUFS，一般 Writable的那一层如果要对底层做修改，采用copy-on-write的形式，即在最上层copy一份要修改的文件，再去修改，再去修改，不适合高高频的写操作，所以Docker支持将宿主机的某个目录以Volume的形式挂载给容器使用！
+
+如果用device mapper，则是用块拷贝。
+
+使用 **-v 宿主机目录：目标挂载点** 来挂载
+
+`docker run --rm=true -it -v /tmp:/testmount centos bash`
+
+volume 支持iscsi、NFS、ceph等
+
+
+
+`数据卷` 是一个可供一个或多个容器使用的特殊目录，它绕过 UFS，可以提供很多有用的特性：
+
+- `数据卷` 可以在容器之间共享和重用
+- 对 `数据卷` 的修改会立马生效
+- 对 `数据卷` 的更新，不会影响镜像
+- `数据卷` 默认会一直存在，即使容器被删除
+
+> 注意：`数据卷` 的使用，类似于 Linux 下对目录或文件进行 mount，镜像中的被指定为挂载点的目录中的文件会隐藏掉，能显示看的是挂载的 `数据卷`。
+
+### 创建一个数据卷
+
+```bash
+$ docker volume create my-vol
+```
+
+查看所有的 `数据卷`
+
+```bash
+$ docker volume ls
+
+local               my-vol
+```
+
+在主机里使用以下命令可以查看指定 `数据卷` 的信息
+
+```bash
+$ docker volume inspect my-vol
+[
+    {
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/my-vol/_data",
+        "Name": "my-vol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+### 启动一个挂载数据卷的容器
+
+在用 `docker run` 命令的时候，使用 `--mount` 标记来将 `数据卷` 挂载到容器里。在一次 `docker run` 中可以挂载多个 `数据卷`。
+
+下面创建一个名为 `web` 的容器，并加载一个 `数据卷` 到容器的 `/webapp` 目录。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v my-vol:/wepapp \
+    --mount source=my-vol,target=/webapp \
+    training/webapp \
+    python app.py
+```
+
+### 查看数据卷的具体信息
+
+在主机里使用以下命令可以查看 `web` 容器的信息
+
+```bash
+$ docker inspect web
+```
+
+`数据卷` 信息在 "Mounts" Key 下面
+
+```json
+"Mounts": [
+    {
+        "Type": "volume",
+        "Name": "my-vol",
+        "Source": "/var/lib/docker/volumes/my-vol/_data",
+        "Destination": "/app",
+        "Driver": "local",
+        "Mode": "",
+        "RW": true,
+        "Propagation": ""
+    }
+],
+```
+
+### 删除数据卷
+
+```bash
+$ docker volume rm my-vol
+```
+
+`数据卷` 是被设计用来持久化数据的，它的生命周期独立于容器，Docker 不会在容器被删除后自动删除 `数据卷`，并且也不存在垃圾回收这样的机制来处理没有任何容器引用的 `数据卷`。如果需要在删除容器的同时移除数据卷。可以在删除容器的时候使用 `docker rm -v` 这个命令。
+
+无主的数据卷可能会占据很多空间，要清理请使用以下命令
+
+```bash
+$ docker volume prune
+```
+
+## 挂载主机目录
+
+### 挂载一个主机目录作为数据卷
+
+使用 `--mount` 标记可以指定挂载一个本地主机的目录到容器中去。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v /src/webapp:/opt/webapp \
+    --mount type=bind,source=/src/webapp,target=/opt/webapp \
+    training/webapp \
+    python app.py
+```
+
+上面的命令加载主机的 `/src/webapp` 目录到容器的 `/opt/webapp`目录。这个功能在进行测试的时候十分方便，比如用户可以放置一些程序到本地目录中，来查看容器是否正常工作。本地目录的路径必须是绝对路径，以前使用 `-v` 参数时如果本地目录不存在 Docker 会自动为你创建一个文件夹，现在使用 `--mount` 参数时如果本地目录不存在，Docker 会报错。
+
+Docker 挂载主机目录的默认权限是 `读写`，用户也可以通过增加 `readonly` 指定为 `只读`。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v /src/webapp:/opt/webapp:ro \
+    --mount type=bind,source=/src/webapp,target=/opt/webapp,readonly \
+    training/webapp \
+    python app.py
+```
+
+加了 `readonly` 之后，就挂载为 `只读` 了。如果你在容器内 `/opt/webapp` 目录新建文件，会显示如下错误
+
+```bash
+/opt/webapp # touch new.txt
+touch: new.txt: Read-only file system
+```
+
+### 查看数据卷的具体信息
+
+在主机里使用以下命令可以查看 `web` 容器的信息
+
+```bash
+$ docker inspect web
+```
+
+`挂载主机目录` 的配置信息在 "Mounts" Key 下面
+
+```json
+"Mounts": [
+    {
+        "Type": "bind",
+        "Source": "/src/webapp",
+        "Destination": "/opt/webapp",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+    }
+],
+```
+
+### 挂载一个本地主机文件作为数据卷
+
+`--mount` 标记也可以从主机挂载单个文件到容器中
+
+```bash
+$ docker run --rm -it \
+   # -v $HOME/.bash_history:/root/.bash_history \
+   --mount type=bind,source=$HOME/.bash_history,target=/root/.bash_history \
+   ubuntu:18.04 \
+   bash
+
+root@2affd44b4667:/# history
+1  ls
+2  diskutil list
+```
+
+这样就可以记录在容器输入过的命令了。
+
+
+
+## 容器互联
+
+如果你之前有 `Docker` 使用经验，你可能已经习惯了使用 `--link` 参数来使容器互联。
+
+随着 Docker 网络的完善，强烈建议大家将容器加入自定义的 Docker 网络来连接多个容器，而不是使用 `--link` 参数。
+
+### 新建网络
+
+下面先创建一个新的 Docker 网络。
+
+```
+$ docker network create -d bridge my-net
+
+```
+
+`-d` 参数指定 Docker 网络类型，有 `bridge` `overlay`。其中 `overlay` 网络类型用于 [Swarm mode](https://yeasy.gitbooks.io/docker_practice/content/swarm_mode)，在本小节中你可以忽略它。
+
+### 连接容器
+
+运行一个容器并连接到新建的 `my-net` 网络
+
+```
+$ docker run -it --rm --name busybox1 --network my-net busybox sh
+```
+
+打开新的终端，再运行一个容器并加入到 `my-net` 网络
+
+```
+$ docker run -it --rm --name busybox2 --network my-net busybox sh
+```
+
+再打开一个新的终端查看容器信息
+
+```
+$ docker container ls
+
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+b47060aca56b        busybox             "sh"                11 minutes ago      Up 11 minutes                           busybox2
+8720575823ec        busybox             "sh"                16 minutes ago      Up 16 minutes                           busybox1
+
+```
+
+下面通过 `ping` 来证明 `busybox1` 容器和 `busybox2` 容器建立了互联关系。
+
+在 `busybox1` 容器输入以下命令
+
+```
+/ # ping busybox2
+PING busybox2 (172.19.0.3): 56 data bytes
+64 bytes from 172.19.0.3: seq=0 ttl=64 time=0.072 ms
+64 bytes from 172.19.0.3: seq=1 ttl=64 time=0.118 ms
+```
+
+
+
+
+
+## docker 手动配置 DNS
+
+
+
+如果用户想要手动指定容器的配置，可以在使用 `docker run` 命令启动容器时加入如下参数：
+
+`-h HOSTNAME` 或者 `--hostname=HOSTNAME` 设定容器的主机名，它会被写到容器内的 `/etc/hostname` 和 `/etc/hosts`。但它在容器外部看不到，既不会在 `docker container ls` 中显示，也不会在其他的容器的 `/etc/hosts` 看到。
+
+`--dns=IP_ADDRESS` 添加 DNS 服务器到容器的 `/etc/resolv.conf` 中，让容器用这个服务器来解析所有不在 `/etc/hosts` 中的主机名。
+
+`--dns-search=DOMAIN` 设定容器的搜索域，当设定搜索域为 `.example.com` 时，在搜索一个名为 host 的主机时，DNS 不仅搜索 host，还会搜索 `host.example.com`。
+
+> 注意：如果在容器启动时没有指定最后两个参数，Docker 会默认用主机上的 `/etc/resolv.conf` 来配置容器。
+>
+
+## Docker 宿主机之间的互联
+
+
+
+
 
 # 参考资料
 
