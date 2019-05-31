@@ -1420,6 +1420,14 @@ root@test1:/# curl 172.16.20.1
 
 
 
+# Docker 三剑客
+
+Docker machine：在一台物理主机上自动创建很多虚拟机来运行Docker
+
+Docker swarm：集群管理，一个前端控制台来自动在后端多个Docker宿主机上启用容器，支持HA
+
+Docker compose：服务编排，可以用于做一整套应用的部署蓝图，但是并不好用
+
 
 
 # 参考资料
