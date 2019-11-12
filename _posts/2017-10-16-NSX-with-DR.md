@@ -183,7 +183,7 @@ SRM依然可以沿用其最佳实践，在使用NSX后，SRM不在需要PortGrou
 
 NSX 组件恢复步骤（详情参见参考资料）：
 
-1、在备份站点，将 Secondary NSX manager 从 Primary NSX Manager 断开（状态会变为 Transit）
+1、在备份站点，将 Secondary NSX manager 从 Primary NSX Manager 断开（状态会变为 Standalone）
 
 2、将 Secondary NSX Manager 设置为 Primary 角色
 
