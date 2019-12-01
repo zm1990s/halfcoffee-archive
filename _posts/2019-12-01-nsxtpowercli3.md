@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "nsx-t powercli script to batch create firewall rules"
+title:  "nsx-t powercli script to batch create T1 router ports"
 date:   2019-12-01
 categories: NSX
 tags: vmware powercli nsx-t nsxt powershell
@@ -16,234 +16,78 @@ typora-root-url: ../../halfcoffee
 There are few things you should know before use:
 
 1. Don‘t change table names 
-2. Action must be **ALLOW** or **DROP** or **REJECT**, case sensitive
-3. The script **ONLY** support **one source、one destination、one service per rule**
 4. Tested on **Powershell Core 6.2.3 、PowerCLI 11.5.0**
-5. The script would not create **sourceipset/dstipset/service** if it's name is used (which should mean they already exist!)
-6. But for firewall rules, the script will create them each and every time you run! be careful of the duplicated rules. 
+3. before you begin, you may want to [batch create logical switches (i.e. Segments)](https://www.halfcoffee.com/2019/12/01/nsxtpowercli2/)
 
 ## csv example
 
-```csv
-rulename,srcipsetname,srcips,dstipsetname,dstips,servicename,protocol,port,action
-APP1,APP1-192.168.1.1_10,192.168.1.1-192.168.1.10,any,,TCP-8080,TCP,8080,ALLOW
-APP2,any,,APP2-172.16.0.0/24,172.16.0.0/24,HTTP,TCP,80,ALLOW
-Deny any,any,,any,,any,,,DROP
+filename: **lsw.csv**
+
+```
+ls_name,routeport_name,routeport_ip,routeport_prefix
+LS-01,LS-01,192.168.101.1,24
+LS-02,LS-02,192.168.102.1,24
+LS-03,LS-03,192.168.103.1,24
 ```
 
-![WX20191201-171309@2x](/pics/WX20191201-171309@2x.png)
-
+![WX20191201-171309@2x](/pics/WX20191201-201932@2x.png)
 
 
 ## The code
 
 ```powershell
-#Author: zm1990s@gmail.com
+$table=Import-Csv ./lsw.csv
 
-#import firewall csv
-$table=Import-Csv ./fw.csv
-[array]::Reverse($table)
+#1. getting T1 router's ID
+$t1routename="k8s-cluster1-pear"
+$t1routesvc = Get-NsxtService -Name com.vmware.nsx.logical_routers
+$t1routeid=$t1routesvc.list().results | where display_name -eq "$t1routename"
 
-#the section you want your rules in 
-$fwsectionname = "Default Layer3 Section" 
+foreach ($routeport in $table ){
 
+#2. getting Logicalswitch ID 
+$logSwitchSvc = Get-NsxtService -Name com.vmware.nsx.logical_switches 
+$logSwitchid = $logSwitchSvc.list().results | where display_name -eq $routeport.ls_name
 
-foreach ($rule in $table)
-{
+#3. creating logical port
+$logicalportsvc = Get-NsxtService com.vmware.nsx.logical_ports
+$logicalportspec= $logicalportsvc.help.create.logical_port.create()
+$logicalportspec.logical_switch_id=$logSwitchid.id
+$logicalportspec.display_name=$routeport.ls_name+"-l3port"
+$logicalportspec.admin_state="UP"
+$logicalportspec
+$logicalportsvc.create($logicalportspec)
 
-#1. firewall source IPset, if not exist, create it 
+#3.1 getting logical port's id
+$logicalportid=$logicalportsvc.list().results | where display_name -eq $logicalportspec.display_name
 
-$fwruleipsetssvc = Get-NsxtService -Name com.vmware.nsx.ip_sets
-if ($fwruleipsetssvc.list().results | where display_name -eq $rule.srcipsetname) {
-    Write-Host "Source IPset already created !" -ForegroundColor Yellow
-    $fwipseccreated=$fwruleipsetssvc.list().results | where display_name -eq $rule.srcipsetname 
-    $srcsetsinfo =""| select target_id,target_type   
-    $srcsetsinfo.target_id=$fwipseccreated.id
-    $srcsetsinfo.target_type=$fwipseccreated.resource_type
-    Write-Host "Source IPset ID is" 
-    $srcsetsinfo.target_id
-   
-}
-elseif ($rule.srcipsetname -eq "any") {
-    Write-Host "souce is any, ignoring" -ForegroundColor Yellow
-}
-else {
-    $fwruleipsets=$fwruleipsetssvc.Help.create.ip_set.create()
+#4. creating route port on T1
+$routeportsvc = Get-NsxtService -Name com.vmware.nsx.logical_router_ports
+$routeportspec = $routeportsvc.help.create.logical_router_port.logical_router_down_link_port.create()
 
-    #1.1. ipset rule name
-    $fwruleipsets.display_name=@()
-    $fwruleipsets.display_name=$rule.srcipsetname
+#4.1 setup route port name
+$routeportspec.display_name=$routeport.routeport_name
 
-    #1.2. ipset addresses
-    $fwruleipsets.ip_addresses=@()
-    $fwruleipsets.ip_addresses+=$rule.srcips
-    #for debug: display $fwruleipsets
-    #$fwruleipsets
+#4.2 setup route port and associate it to logical port in #3
+$routeportspec.linked_logical_switch_port_id=$routeportsvc.help.create.logical_router_port.logical_router_down_link_port.linked_logical_switch_port_id.Create()
+$routeportspec.linked_logical_switch_port_id.target_id=$logicalportid.id
+$routeportspec.linked_logical_switch_port_id.target_type="LogicalPort"
 
-    #1.3 creating ipset
-    $fwruleipsetssvc.create($fwruleipsets)
+#4.3 setup route port's ip and subnet
+$ipinfo="" |select  ip_addresses,prefix_length
+$ipinfo.ip_addresses=New-Object System.Collections.Generic.List[string]
+$ipinfo.ip_addresses=@($routeport.routeport_ip)
+$ipinfo.prefix_length=$routeport.routeport_prefix
 
-    #1.4 filter created ipsers, get id and type
- 
-    $fwipseccreated=$fwruleipsetssvc.list().results | where display_name -eq $rule.srcipsetname 
-    $srcsetsinfo =""| select target_id,target_type   
-    $srcsetsinfo.target_id=$fwipseccreated.id
-    $srcsetsinfo.target_type=$fwipseccreated.resource_type
-    Write-Host "Source IPset ID is" 
-    $srcsetsinfo.target_id
-   }
+$routeportspec.subnets = $routeportsvc.help.create.logical_router_port.logical_router_down_link_port.subnets.create()
+$routeportspec.subnets=@($ipinfo)
 
-#2. firewall destination IPset, if not exist, create it 
+#4.4 setup route port's T1 router
+$routeportspec.logical_router_id=$t1routeid.id
 
-$fwruleipsetssvc = Get-NsxtService -Name com.vmware.nsx.ip_sets
-if ($fwruleipsetssvc.list().results | where display_name -eq $rule.dstipsetname) {
-    Write-Host "Destination IPset already created !" -ForegroundColor Yellow
-    $fwipseccreated=$fwruleipsetssvc.list().results | where display_name -eq $rule.dstipsetname 
-    $dstsetsinfo =""| select target_id,target_type   
-    $dstsetsinfo.target_id=$fwipseccreated.id
-    $dstsetsinfo.target_type=$fwipseccreated.resource_type
-    Write-Host "Destination IPset ID is" 
-    $dstsetsinfo.target_id
-   
-}
-elseif ($rule.dstipsetname -eq "any") {
-    Write-Host "destination is any, ignoring" -ForegroundColor Yellow
-}
-else {
-    $fwruleipsets=$fwruleipsetssvc.Help.create.ip_set.create()
-
-    #1.1. ipset rule name
-    $fwruleipsets.display_name=@()
-    $fwruleipsets.display_name=$rule.dstipsetname
-
-    #1.2. ipset addresses
-    $fwruleipsets.ip_addresses=@()
-    $fwruleipsets.ip_addresses+=$rule.dstips
-    #for debug: display $fwruleipsets
-    $fwruleipsets
-
-    #1.3 creating ipset
-    $fwruleipsetssvc.create($fwruleipsets)
-
-    #1.4 filter created ipsers, get id and type
-    #$fwipseccreated=$fwruleipsetssvc.list().results | where display_name -eq $fwruleipsets.display_name | select id,resource_type
-    $fwipseccreated=$fwruleipsetssvc.list().results | where display_name -eq $rule.dstipsetname 
-    $dstsetsinfo =""| select target_id,target_type   
-    $dstsetsinfo.target_id=$fwipseccreated.id
-    $dstsetsinfo.target_type=$fwipseccreated.resource_type
-    Write-Host "Destination IPset ID is" 
-    $dstsetsinfo.target_id
-  }
-
-
-#3. creating service
-
-$servicesvc = Get-NsxtService -Name com.vmware.nsx.ns_services
-
-#3.1. Check if service exists
-if ( $servicesvc.list().results | where display_name -eq $rule.servicename )
-{
-    Write-Host "Service already created !" -ForegroundColor Yellow
-  
-    $fwservicecreated= $servicesvc.list().results | where display_name -eq $rule.servicename 
-
-    $serviceinfo="" | select target_id,target_display_name,target_type
-    $serviceinfo.target_id=$fwservicecreated.id
-    $serviceinfo.target_display_name=$fwservicecreated.display_name
-    $serviceinfo.target_type=$fwservicecreated.resource_type
-    Write-Host "Service ID is" 
-    $serviceinfo.target_id
-
-}
-#3.2. Check if service is any
-elseif ( $rule.servicename -eq "any") {
-    Write-Host "service is any, ignoring" -ForegroundColor Yellow
-} 
-#3.3. Check if service does no exists, create it
-else 
-{   
-    $servicesvc = Get-NsxtService -Name com.vmware.nsx.ns_services
-    Write-Host "Creating Service!" -ForegroundColor Green
-    $servicespec = $servicesvc.Help.create.ns_service.Create()
-
-    $servicespec.display_name = $rule.servicename
-    $servicedetailspec = $servicesvc.Help.create.ns_service.nsservice_element.l4_port_set_NS_service.Create()
-    $servicedetailspec.destination_ports = New-Object System.Collections.Generic.List[string]
-    $servicedetailspec.destination_ports.add($rule.port)
-    $servicedetailspec.l4_protocol = $rule.protocol
-    $servicedetailspec.resource_type = "L4PortSetNSService"
-    $servicespec.nsservice_element = $servicedetailspec
-    #$servicespec
-    $servicesvc.create($servicespec)
-
-    $fwservicecreated= $servicesvc.list().results | where display_name -eq $rule.servicename 
-
-    $serviceinfo="" | select target_id,target_display_name,target_type
-    $serviceinfo.target_id=$fwservicecreated.id
-    $serviceinfo.target_display_name=$fwservicecreated.display_name
-    $serviceinfo.target_type=$fwservicecreated.resource_type
-    Write-Host "Service ID is" 
-    $serviceinfo.target_id
-}
-
-
-#4. building firewall rule
-$fwrulesvc = Get-NsxtService -Name com.vmware.nsx.firewall.sections.rules
-$fwrulespec = $fwrulesvc.Help.create.firewall_rule.Create()
-
-#4.1. getting firewall rule name
-$fwrulespec.display_name = $rule.rulename
-
-#4.2. setting firewall rule source
-if ($rule.srcipsetname -eq "any") 
-{   Write-Host "sources is any, resetting varible!" -ForegroundColor Yellow
-    $fwrulespec.sources = @()
-}
-else{
-    $fwrulespec.sources=@($srcsetsinfo)
-}
-
-#4.3. setting firewall rule destination
-if ($rule.dstipsetname -eq "any") 
-{   Write-Host "destination is any, resetting varible!" -ForegroundColor Yellow
-    $fwrulespec.destinations = @()
-}
-else {
-    $fwrulespec.destinations=@($dstsetsinfo)
-}
-
-
-#4.4. setting firewall service
-if ($rule.servicename -eq "any") 
-{
-    Write-Host "service is any, resetting varible!" -ForegroundColor Yellow
-    $fwrulespec.services = @()
-} 
-else{$fwrulespec.services = @($serviceinfo)}
-
-#4.5. setting firewall action
-$fwrulespec.action = $rule.action
-
-#4.6. turn on logging if you want
-#$fwrulespec.logged = $true
-
-
-#4.7. get section id and current section revision
-$fwsectsvc = Get-NsxtService -Name com.vmware.nsx.firewall.sections
-$fwsections = $fwsectsvc.list()
-$fwsection = $fwsections.results | Where-Object {$_.display_name -eq $fwsectionname}
-$fwrulespec.revision = $fwsection.revision
-
-#4.8. display current settings
-Write-Host "settings for current rules !" -ForegroundColor Green
-$fwrulespec
-
-#4.9. create the firewall rule
-$fwrule = $fwrulesvc.create($fwsection.id, $fwrulespec)
-
-#4.10. give it a time to fly
-sleep 2
-
+#4.5 Creating it!
+#$routeportspec
+$routeportsvc.create($routeportspec)
 }
 ```
 
@@ -251,7 +95,7 @@ sleep 2
 
 ## the result
 
-![WX20191201-171218@2x](/pics/WX20191201-171218@2x.png)
+![WX20191201-171218@2x](/pics/WX20191201-202029@2x.png)
 
 
 
