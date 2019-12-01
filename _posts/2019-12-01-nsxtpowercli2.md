@@ -35,30 +35,33 @@ LS-03
 ## The code
 
 ```powershell
-
+#get logical service
 $logSwitchSvc = Get-NsxtService -Name com.vmware.nsx.logical_switches 
-#获取逻辑交换机相关服务
+
 
 $logSwitchSpec = $logSwitchSvc.Help.create.logical_switch.Create()
 $logSwitchSpec.admin_state = "UP"
 $logSwitchSpec.replication_mode = "MTEP"
 
+#get transportzone info
 $tZoneSvc = Get-NsxtService -Name com.vmware.nsx.transport_zones
-#获取传输区域相关服务
 $tZones = $tZoneSvc.list()
+
+#we assume there's is only one overlay transport zone in your environmnet.
+#if not, use the following line instead
+#$logSwitchSpec.transport_zone_id = ($tZones.results | Where-Object display_name -eq "TransportZoneName"
 $logSwitchSpec.transport_zone_id = ($tZones.results | Where-Object transport_type -eq OVERLAY).id
-#假设环境中只有一个 Overlay 的传输区域，可以用上述命令来自动获取并设置 Tranport Zone ID
 
 
 $lswlist = Import-CSV ./lsw.csv 
 
 Foreach ($lswname in $lswlist) 
 {
+#creating logical switch
 $logSwitchSpec.display_name = $lswname.LS_Name
-
 $logSwitchSpec
 $logSwitchSvc.create($logSwitchSpec)
-#创建逻辑交换机
+
 }
 ```
 
