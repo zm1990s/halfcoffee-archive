@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "nsx-t powercli script to batch create firewall rules"
+title:  "[Series:1/4]nsx-t powercli script to batch create firewall rules"
 date:   2019-12-01
 categories: NSX
 tags: vmware powercli nsx-t nsxt powershell

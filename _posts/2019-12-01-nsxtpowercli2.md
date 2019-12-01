@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "nsx-t powercli script to batch create logical switches"
+title:  "[Series:2/4]nsx-t powercli script to batch create logical switches"
 date:   2019-12-01
 categories: NSX
 tags: vmware powercli nsx-t nsxt powershell

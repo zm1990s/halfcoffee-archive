@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "nsx-t powercli script to batch create T1 router ports"
+title:  "[Series:3/4]nsx-t powercli script to batch create T1 router ports"
 date:   2019-12-01
 categories: NSX
 tags: vmware powercli nsx-t nsxt powershell
