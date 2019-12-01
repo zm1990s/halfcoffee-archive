@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "nsx-t powercli script to batch create firewall rules"
-date:   2010-12-01
+date:   2019-12-01
 categories: NSX
 tags: vmware powercli nsx-t nsxt powershell
 typora-root-url: ../../halfcoffee
