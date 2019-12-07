@@ -104,5 +104,5 @@ $allinfo | ConvertTo-Html -CSSUri "all_LB_info.css" | Set-Content "all_LB_info.h
 
 HTML format:
 
-![image-20191207210433565](/../git-wiki/wiki/pics/image-20191207210433565.png)
+![image-20191207210433565](/pics/image-20191207210433565.png)
 
