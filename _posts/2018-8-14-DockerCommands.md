@@ -1436,20 +1436,3 @@ Docker compose：服务编排，可以用于做一整套应用的部署蓝图，
 
 https://yeasy.gitbooks.io/docker_practice/content/image/pull.html
 
-
-```
-
-```
-tshark
-
-usermod -a -G wireshark test1 
-
-newgrp wireshark
-
-chgrp wireshark /usr/sbin/dumpcap
-
-tshark -i eth0 -w outfile
-
-```
-
-```
