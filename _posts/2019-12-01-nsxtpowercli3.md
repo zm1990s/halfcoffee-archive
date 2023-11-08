@@ -17,7 +17,7 @@ There are few things you should know before use:
 
 1. Don‘t change table names 
 4. Tested on **Powershell Core 6.2.3 、PowerCLI 11.5.0**
-3. before you begin, you may want to [batch create logical switches (i.e. Segments)](https://www.halfcoffee.com/2019/12/01/nsxtpowercli2/)
+3. before you begin, you may want to [batch create logical switches (i.e. Segments)](https://archive.halfcoffee.com/2019/12/01/nsxtpowercli2/)
 
 ## csv example
 

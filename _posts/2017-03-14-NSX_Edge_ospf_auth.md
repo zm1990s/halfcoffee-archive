@@ -112,7 +112,7 @@ NSX 只支持三种认证模式和一种配置办法，即**空认证、明文�
 
 ---
 
-笔者做过锐捷、华为和Cisco交换机的OSPF对接，这两个厂商设备ospf认证原理同Cisco一致。H3C略有不同，具体可参考 [此文章](http://www.halfcoffee.com/2016/12/10/h3c_huawei_cisco_ospf_auth/)。
+笔者做过锐捷、华为和Cisco交换机的OSPF对接，这两个厂商设备ospf认证原理同Cisco一致。H3C略有不同，具体可参考 [此文章](http://archive.halfcoffee.com/2016/12/10/h3c_huawei_cisco_ospf_auth/)。
 
 最后，Cisco也支持调用key chain来进行密文认证。需要在key chain中定义cryptographic-algorithm。估计此种方式在多厂商设备间兼容性更差了。
 

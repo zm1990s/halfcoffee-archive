@@ -39,7 +39,7 @@ OSPF 的设计可以按照下列思路进行，而每个部分都需要做一定
 
 - OSPF 网络类型微调。默认OSPF根据物理接口类型适配OSPF网络类型，但是可能需要手动调整网络类型以便让OSPF环境更加切合实际物理网络。另外有些特殊场合，例如环回口做VPN的接入点时，需要修改环回口的网络类型。
 
-  ​
+  
 
 
 ### 影响OSPF 扩展的因素
@@ -218,11 +218,11 @@ NBMA下必须确保Hub端的接口成为DR，可以通过调整接口 ospf 优�
 
 ---
 
-**关于OSPF网络类型的选择可看另一篇博客：[OSPF 5种网络类型及适用场景](http://www.halfcoffee.com/2017/03/15/ospf_networks/)**
+**关于OSPF网络类型的选择可看另一篇博客：[OSPF 5种网络类型及适用场景](http://archive.halfcoffee.com/2017/03/15/ospf_networks/)**
 
 ---
 
-**关于OSPF认证可以看：[OSPF认证配置](http://www.halfcoffee.com/2017/03/14/NSX_Edge_ospf_auth/)**
+**关于OSPF认证可以看：[OSPF认证配置](http://archive.halfcoffee.com/2017/03/14/NSX_Edge_ospf_auth/)**
 
 ---
 

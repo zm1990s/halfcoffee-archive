@@ -25,7 +25,7 @@ type: page
 
 [链接](https://cloudarchitectblog.wordpress.com/2015/11/11/yvm-download-page/)
 
-为方便墙内用户，已上传到博客： [下载链接](http://www.halfcoffee.com/tools/yVM.ova)
+为方便墙内用户，已上传到博客： [下载链接](http://archive.halfcoffee.com/tools/yVM.ova)
 
 
 

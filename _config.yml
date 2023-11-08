@@ -9,7 +9,7 @@
 title: Half Coffee
 brief-intro:
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://www.halfcoffee.com" # the base hostname & protocol for your site
+url: "https://archive.halfcoffee.com" # the base hostname & protocol for your site
 
 permalink: /:year/:month/:day/:title/
 

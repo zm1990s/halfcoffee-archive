@@ -91,7 +91,7 @@ vSphere 有个很重要的功能是进行了**虚拟机的封装，一个虚拟�
 
 3. 分布式：分布式可以将数据、IO访问分散到多个节点，让整个存储系统随着节点的增多容量和性能线性增加。
 
-4. ​
+4. 
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWeNOUudVEBa4DTMeWuBhlZfpDbU0ATYdg8neGqgC778vfxXyVClibxwYkbhFs5MqsmNjm1licmVpTbdw/640?wx_fmt=png&wxfrom=5&wx_lazy=1)
 
@@ -284,7 +284,7 @@ Wait！上面提到一个词，**对象（Object）**，什么是对象呢？
 
 vSAN 具体如何配置？可以使用电脑打开下面的 Demo，按照指引一步步去创建 vSAN。
 
-http://www.halfcoffee.com/demo/vsan-demo.html
+http://archive.halfcoffee.com/demo/vsan-demo.html
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/ory2UDHYWePVUS0Ix5g9PYwiaOK4FkjUc2vBianRwyjVrbZ4I0t149BYiaSF6P1VG9f9bDNC0LtwuUlWL3wfam6lw/640?wx_fmt=png&wxfrom=5&wx_lazy=1)
 

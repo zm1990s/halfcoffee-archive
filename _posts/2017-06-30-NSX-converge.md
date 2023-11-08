@@ -9,7 +9,7 @@ typora-root-url: ../../halfcoffee
 
 * content
 {:toc}
-> 摘要：在上篇[OSPF在MA网络下收敛时间](http://www.halfcoffee.com/2017/01/07/OSPF-convergence/)时，提到了NSX的收敛时间，刚好这次有机会进行了关于NSX更为细致的测试，发现 NSX 并不能只根据那篇文章最后的总结，修改OSPF hello dead时间就行，事实更为复杂
+> 摘要：在上篇[OSPF在MA网络下收敛时间](http://archive.halfcoffee.com/2017/01/07/OSPF-convergence/)时，提到了NSX的收敛时间，刚好这次有机会进行了关于NSX更为细致的测试，发现 NSX 并不能只根据那篇文章最后的总结，修改OSPF hello dead时间就行，事实更为复杂
 
 这次进行了两种设计的测试，一种是Edge HA，一种是DLR开启ECMP+多个Edge。
 
